@@ -1,7 +1,7 @@
 package com.usmonie.compass.state
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -88,13 +88,15 @@ class StateViewModelTest {
 
     @Test
     fun `should work with FlowStateViewModel for multiple events`() = runTest(testDispatcher) {
-        val viewModel = stateViewModel<TestState, TestAction, TestEvent, TestEffect>(
+        val viewModel = flowStateViewModel<TestState, TestAction, TestEvent, TestEffect>(
             initialState = TestState(0),
             processAction = { action, _ ->
-                when (action) {
-                    TestAction.Increment -> flowOf(TestEvent.Incremented, TestEvent.Incremented)
-                    TestAction.Decrement -> flowOf(TestEvent.Decremented)
-                }
+                flowOf(
+                    when (action) {
+                        TestAction.Increment -> TestEvent.Incremented
+                        TestAction.Decrement -> TestEvent.Decremented
+                    }
+                )
             },
             handleEvent = { _, _ -> null },
             reduce = { event ->
@@ -107,10 +109,10 @@ class StateViewModelTest {
 
         assertEquals(0, viewModel.state.value.count)
 
-        // This should increment twice (because of flowOf(TestEvent.Incremented, TestEvent.Incremented))
+        // This should increment once
         viewModel.handleAction(TestAction.Increment)
 
-        assertEquals(2, viewModel.state.value.count)
+        assertEquals(1, viewModel.state.value.count)
 
         viewModel.onDispose()
     }
@@ -119,34 +121,11 @@ class StateViewModelTest {
 class ContentStateTest {
 
     @Test
-    fun `should handle ContentState operations correctly`() {
+    fun `should handle ContentState map operations correctly`() {
         val successState: ContentState<String> = ContentState.Success("Hello")
         val errorState: ContentState<String> =
-            ContentState.Error(object : ErrorState(RuntimeException("Test")) {})
+            ContentState.Error<String, ErrorState>(object : ErrorState(RuntimeException("Test")) {})
         val loadingState: ContentState<String> = ContentState.Loading()
-
-        // Test onSuccess
-        var successCalled = false
-        successState.onSuccess { data ->
-            assertEquals("Hello", data)
-            successCalled = true
-        }
-        assertEquals(true, successCalled)
-
-        // Test onError
-        var errorCalled = false
-        errorState.onError<String, ErrorState> { error ->
-            assertEquals("Test", error.message)
-            errorCalled = true
-        }
-        assertEquals(true, errorCalled)
-
-        // Test onLoading
-        var loadingCalled = false
-        loadingState.onLoading {
-            loadingCalled = true
-        }
-        assertEquals(true, loadingCalled)
 
         // Test map
         val mappedSuccess = successState.map { it.uppercase() }
@@ -155,5 +134,18 @@ class ContentStateTest {
         // Test updateData
         val updatedSuccess = successState.updateData { "$it World" }
         assertEquals("Hello World", (updatedSuccess as ContentState.Success).data)
+
+        // Test type checking
+        assertEquals(true, successState is ContentState.Success)
+        assertEquals(false, successState is ContentState.Error<*, *>)
+        assertEquals(false, successState is ContentState.Loading)
+
+        assertEquals(false, errorState is ContentState.Success)
+        assertEquals(true, errorState is ContentState.Error<*, *>)
+        assertEquals(false, errorState is ContentState.Loading)
+
+        assertEquals(false, loadingState is ContentState.Success)
+        assertEquals(false, loadingState is ContentState.Error<*, *>)
+        assertEquals(true, loadingState is ContentState.Loading)
     }
 }

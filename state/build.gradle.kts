@@ -8,7 +8,16 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.androidLibrary)
     id("maven-publish")
+    // id("signing") // Will be enabled when signing is properly configured
 }
+
+// Configure signing for Maven Central (commented out for now)
+// signing {
+//     val signingKey: String? by project
+//     val signingPassword: String? by project
+//     useInMemoryPgpKeys(signingKey, signingPassword)
+//     sign(publishing.publications)
+// }
 
 group = "com.usmonie.compass.state"
 version = "0.2.0"
@@ -100,12 +109,35 @@ kotlin {
     js(IR) {
         browser()
         nodejs()
+
+        // Configure tests to use Node.js instead of browser
+        browser {
+            testTask {
+                enabled = false // Disable browser tests
+            }
+        }
+
+        // Use Node.js for testing
+        nodejs {
+            testTask {
+                useMocha {
+                    timeout = "10s"
+                }
+            }
+        }
     }
 
     // Add WASM target for future web support
     @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
     wasmJs {
         browser()
+
+        // Disable browser tests for WASM as well
+        browser {
+            testTask {
+                enabled = false // Disable browser tests that require Chrome
+            }
+        }
     }
 
     sourceSets.all {
@@ -151,8 +183,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 }
 
