@@ -68,7 +68,7 @@ publishing {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(23)
     androidTarget {
         publishLibraryVariants("release")
         //https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-test.html
@@ -116,7 +116,6 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(libs.androidx.collections)
-            implementation(libs.androidx.core.ktx)
             implementation(compose.runtime)
             implementation(compose.foundation)
 
@@ -125,7 +124,7 @@ kotlin {
 
         commonTest.dependencies {
             implementation(kotlin("test"))
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+            implementation(libs.kotlinx.coroutines.test)
         }
 
         androidMain.dependencies {

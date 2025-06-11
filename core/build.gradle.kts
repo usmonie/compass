@@ -70,7 +70,7 @@ publishing {
 }
 
 kotlin {
-    jvmToolchain(17) // Changed from 23 to 17 for better compatibility
+    jvmToolchain(23) // Changed from 17 to 23 to match installed Java version
     androidTarget {
         publishLibraryVariants("release")
         //https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-test.html
@@ -115,14 +115,13 @@ kotlin {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.ui)
-            implementation(libs.androidx.core.ktx)
             implementation(libs.androidx.collections)
             api(libs.ui.backhandler)
         }
 
         commonTest.dependencies {
             implementation(kotlin("test"))
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
+            implementation(libs.kotlinx.coroutines.test)
         }
 
         androidMain.dependencies {
@@ -149,8 +148,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 }
 
