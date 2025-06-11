@@ -1,27 +1,26 @@
-# Compass State Management
+# Compass State - MVI Architecture for Kotlin Multiplatform
 
 [![Maven Central](https://img.shields.io/maven-central/v/com.usmonie.compass/state.svg)](https://search.maven.org/search?q=g:com.usmonie.compass)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Kotlin](https://img.shields.io/badge/kotlin-multiplatform-orange.svg)](https://kotlinlang.org/docs/multiplatform.html)
 
-A powerful, type-safe state management library for Kotlin Multiplatform projects, implementing the
-MVI (Model-View-Intent) architecture pattern with seamless Jetpack Compose integration and built-in
-navigation support.
+A powerful, type-safe state management library implementing the MVI (Model-View-Intent) architecture
+pattern with seamless Jetpack Compose integration.
 
-## 🚀 Why Compass State?
+## 🌟 Key Features
 
-- **🏗️ MVI Architecture**: Clean, predictable unidirectional data flow
-- **🔒 Type Safety**: Compile-time safety for actions, states, events, and effects
-- **🌍 Multiplatform**: Works across Android, iOS, Desktop, and Web
-- **⚛️ Compose-First**: Built specifically for Jetpack Compose with automatic state observation
-- **🧭 Navigation**: Integrated navigation system with state preservation
-- **⚡ Performance**: Optimized for minimal recompositions and efficient memory usage
-- **🧪 Testable**: Pure functions and immutable data make testing straightforward
-- **📖 DSL Support**: Declarative APIs with minimal boilerplate
+- **🏗️ MVI Architecture** - Clean, predictable unidirectional data flow
+- **🔒 Type Safety** - Strongly typed `State`, `Action`, `Event`, and `Effect`
+- **⚛️ Reactive** - Built on Kotlin Coroutines and Flow
+- **🎯 Multiple ViewModels** - `StateViewModel` and `FlowStateViewModel`
+- **📦 Content State** - `ContentState<T>` for loading/success/error patterns
+- **🧩 Compose Integration** - `StateContent` and `StatefulComponent`
+- **🧪 Testing Support** - Pure functions for easy testing
+- **🎨 DSL Support** - Declarative APIs with minimal boilerplate
 
-## 📦 Installation
+## 🚀 Quick Start
 
-### Gradle (Kotlin DSL)
+### Installation
 
 ```kotlin
 dependencies {
@@ -32,52 +31,29 @@ dependencies {
 }
 ```
 
-### Gradle (Groovy)
-
-```groovy
-dependencies {
-    implementation 'com.usmonie.compass:state:0.2.0'
-    
-    // Optional: For navigation integration
-    implementation 'com.usmonie.compass:core:0.2.0'
-}
-```
-
-## 🏃‍♂️ Quick Start
-
-### 1. Define Your MVI Components
+### Basic Usage
 
 ```kotlin
-// State - What your UI looks like
-data class CounterState(
-    val count: Int = 0,
-    val isLoading: Boolean = false
-) : State
+// 1. Define your MVI components
+data class CounterState(val count: Int = 0) : State
 
-// Actions - What users can do
 sealed class CounterAction : Action {
     object Increment : CounterAction()
     object Decrement : CounterAction()
     object Reset : CounterAction()
 }
 
-// Events - What happened internally
 sealed class CounterEvent : Event {
     object Incremented : CounterEvent()
     object Decremented : CounterEvent()
     object Reset : CounterEvent()
 }
 
-// Effects - One-time side effects (optional)
 sealed class CounterEffect : Effect {
     data class ShowToast(val message: String) : CounterEffect()
-    object NavigateToSettings : CounterEffect()
 }
-```
 
-### 2. Create a ViewModel
-
-```kotlin
+// 2. Create ViewModel
 class CounterViewModel : StateViewModel<CounterState, CounterAction, CounterEvent, CounterEffect>(
     initialState = CounterState()
 ) {
@@ -100,146 +76,117 @@ class CounterViewModel : StateViewModel<CounterState, CounterAction, CounterEven
         else -> null
     }
 }
-```
 
-### 3. Create Your Compose UI
-
-```kotlin
+// 3. Use in Compose
 @Composable
-fun CounterScreen(viewModel: CounterViewModel = remember { CounterViewModel() }) {
+fun CounterScreen() {
+    val viewModel = remember { CounterViewModel() }
+    
     StateContent(
         viewModel = viewModel,
         onEffect = { effect ->
             when (effect) {
                 is CounterEffect.ShowToast -> {
                     // Show toast or snackbar
-                    println("Toast: ${effect.message}")
-                }
-                CounterEffect.NavigateToSettings -> {
-                    // Handle navigation
                 }
             }
         }
     ) { state, onAction ->
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "Count: ${state.count}",
-                style = MaterialTheme.typography.headlineMedium
-            )
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
+        Column {
+            Text("Count: ${state.count}")
             Row {
-                Button(onClick = { onAction(CounterAction.Decrement) }) {
-                    Text("-")
-                }
-                
-                Spacer(modifier = Modifier.width(16.dp))
-                
-                Button(onClick = { onAction(CounterAction.Increment) }) {
-                    Text("+")
-                }
-                
-                Spacer(modifier = Modifier.width(16.dp))
-                
-                Button(onClick = { onAction(CounterAction.Reset) }) {
-                    Text("Reset")
-                }
+                Button(onClick = { onAction(CounterAction.Decrement) }) { Text("-") }
+                Button(onClick = { onAction(CounterAction.Increment) }) { Text("+") }
+                Button(onClick = { onAction(CounterAction.Reset) }) { Text("Reset") }
             }
         }
     }
 }
 ```
 
-## 🎯 Key Concepts
+## 🏗️ Architecture Overview
 
 ### MVI Flow
-
 ```
-User Action → Process Action → Event → Reduce State → New State
-                                ↓
-                            Handle Event → Effect (Optional)
+User Action → ActionProcessor → Event → StateManager → New State
+                                 ↓
+                           EventHandler → Effect (Optional)
 ```
 
-1. **User triggers an Action** (button click, text input, etc.)
-2. **Action is processed** into an Event (business logic, API calls)
-3. **Event reduces State** (pure function, no side effects)
-4. **New State updates UI** (automatic recomposition)
-5. **Effects are handled** (navigation, toasts, etc.)
+### Core Components
 
-### State Management Patterns
+1. **State** - Immutable data representing your UI
+2. **Action** - User intents and interactions
+3. **Event** - Internal events resulting from action processing
+4. **Effect** - One-time side effects (navigation, toasts, etc.)
 
-#### Simple State Updates
+## 📚 Core APIs
+
+### StateViewModel
+
+For single event per action:
 
 ```kotlin
-// For straightforward state changes
-class SimpleViewModel : StateViewModel<SimpleState, SimpleAction, SimpleEvent, Nothing>(
-    initialState = SimpleState()
+class SimpleViewModel : StateViewModel<MyState, MyAction, MyEvent, MyEffect>(
+    initialState = MyState()
 ) {
-    override suspend fun processAction(action: SimpleAction): SimpleEvent = when (action) {
-        is SimpleAction.UpdateText -> SimpleEvent.TextUpdated(action.text)
+    override suspend fun processAction(action: MyAction): MyEvent {
+        // Convert action to event (business logic)
     }
 
-    override fun SimpleState.reduce(event: SimpleEvent): SimpleState = when (event) {
-        is SimpleEvent.TextUpdated -> copy(text = event.text)
+    override fun MyState.reduce(event: MyEvent): MyState {
+        // Pure state reduction
     }
 
-    override suspend fun handleEvent(event: SimpleEvent): Nothing? = null
+    override suspend fun handleEvent(event: MyEvent): MyEffect? {
+        // Optional side effects
+    }
 }
 ```
 
-#### Complex Async Operations
+### FlowStateViewModel
+
+For multiple events per action:
 
 ```kotlin
-// For operations that need multiple state updates
-class DataViewModel : FlowStateViewModel<DataState, DataAction, DataEvent, DataEffect>(
-    initialState = DataState()
+class FlowViewModel : FlowStateViewModel<MyState, MyAction, MyEvent, MyEffect>(
+    initialState = MyState()
 ) {
-    override suspend fun processAction(action: DataAction): Flow<DataEvent> = flow {
-        when (action) {
-            DataAction.LoadData -> {
-                emit(DataEvent.LoadingStarted)
-                try {
-                    val data = repository.loadData()
-                    emit(DataEvent.DataLoaded(data))
-                    emit(DataEvent.LoadingCompleted)
-                } catch (e: Exception) {
-                    emit(DataEvent.LoadingFailed(e.message ?: "Unknown error"))
-                }
-            }
+    override suspend fun processAction(action: MyAction): Flow<MyEvent> = flow {
+        emit(MyEvent.LoadingStarted)
+        try {
+            val data = loadData()
+            emit(MyEvent.DataLoaded(data))
+            emit(MyEvent.LoadingCompleted)
+        } catch (e: Exception) {
+            emit(MyEvent.LoadingFailed(e.message ?: "Unknown error"))
         }
     }
-    
-    override fun DataState.reduce(event: DataEvent): DataState = when (event) {
-        DataEvent.LoadingStarted -> copy(isLoading = true, error = null)
-        is DataEvent.DataLoaded -> copy(data = event.data)
-        DataEvent.LoadingCompleted -> copy(isLoading = false)
-        is DataEvent.LoadingFailed -> copy(isLoading = false, error = event.error)
+
+    override fun MyState.reduce(event: MyEvent): MyState = when (event) {
+        MyEvent.LoadingStarted -> copy(isLoading = true)
+        is MyEvent.DataLoaded -> copy(data = event.data, isLoading = false)
+        is MyEvent.LoadingFailed -> copy(error = event.error, isLoading = false)
+        else -> this
     }
 
-    override suspend fun handleEvent(event: DataEvent): DataEffect? = when (event) {
-        is DataEvent.LoadingFailed -> DataEffect.ShowError(event.error)
+    override suspend fun handleEvent(event: MyEvent): MyEffect? = when (event) {
+        is MyEvent.LoadingFailed -> MyEffect.ShowError(event.error)
         else -> null
     }
 }
 ```
 
-## 🔧 Advanced Features
+### ContentState
 
-### Content State Management
-
-Handle loading/success/error states elegantly:
+Elegant loading/success/error state management:
 
 ```kotlin
 data class UserListState(
     val users: ContentState<List<User>> = ContentState.Loading()
 ) : State
 
-// In your UI
+// In UI
 when (val usersState = state.users) {
     is ContentState.Loading -> CircularProgressIndicator()
     is ContentState.Success -> LazyColumn {
@@ -260,48 +207,63 @@ state.users
     .onError { error -> ErrorMessage(error = error.message) }
 ```
 
-### Screen DSL
+## 🎨 UI Integration
 
-Create screens with minimal boilerplate:
+### StateContent
+
+Main composable for UI with automatic state management:
 
 ```kotlin
-val counterScreen = flowStateScreen<CounterState, CounterAction, CounterEvent, CounterEffect>(
-    id = "counter"
-) {
-    initialState(CounterState())
-    
-    processAction { action, state ->
-        flowOf(when (action) {
-            CounterAction.Increment -> CounterEvent.Incremented
-            CounterAction.Decrement -> CounterEvent.Decremented
-        })
-    }
-    
-    reduce { event ->
-        when (event) {
-            CounterEvent.Incremented -> copy(count = count + 1)
-            CounterEvent.Decremented -> copy(count = count - 1)
+@Composable
+fun MyScreen(viewModel: MyViewModel) {
+    StateContent(
+        viewModel = viewModel,
+        onEffect = { effect ->
+            when (effect) {
+                is MyEffect.NavigateToProfile -> {
+                    // Handle navigation
+                }
+                is MyEffect.ShowToast -> {
+                    // Show toast
+                }
+            }
         }
+    ) { state, onAction ->
+        // Your UI content
+        MyContent(state = state, onAction = onAction)
     }
-    
-    handleEvent { event, state -> null }
-    
-    content { state, onAction ->
-        CounterContent(state = state, onAction = onAction)
-    }
-    
-    onEffect { effect ->
-        when (effect) {
-            is CounterEffect.ShowToast -> showToast(effect.message)
+}
+```
+
+### StatefulComponent
+
+For reusable components:
+
+```kotlin
+@Composable
+fun CounterWidget(viewModel: CounterViewModel) {
+    StatefulComponent(
+        viewModel = viewModel,
+        onEffect = { effect ->
+            // Handle effects
+        }
+    ) { state, onAction ->
+        Row {
+            Button(onClick = { onAction(CounterAction.Decrement) }) { Text("-") }
+            Text("${state.count}", modifier = Modifier.padding(16.dp))
+            Button(onClick = { onAction(CounterAction.Increment) }) { Text("+") }
         }
     }
 }
 ```
 
-### Extension Functions for Less Boilerplate
+## 🛠️ Advanced Features
+
+### Extension Functions
+
+Create ViewModels with minimal boilerplate:
 
 ```kotlin
-// Create ViewModels with lambda functions
 val viewModel = createStateViewModel(
     initialState = CounterState(),
     processAction = { action, state ->
@@ -320,45 +282,84 @@ val viewModel = createStateViewModel(
 )
 ```
 
-## 🧭 Navigation Integration
+### DSL Support
 
-Compass State integrates seamlessly with navigation:
+Create reusable components:
 
 ```kotlin
+val counterComponent = stateComponent<CounterState, CounterAction, CounterEvent, CounterEffect> {
+    initialStateProvider { CounterState() }
+    
+    processAction { action, state ->
+        when (action) {
+            CounterAction.Increment -> CounterEvent.Incremented
+            CounterAction.Decrement -> CounterEvent.Decremented
+        }
+    }
+    
+    reduce { event ->
+        when (event) {
+            CounterEvent.Incremented -> copy(count = count + 1)
+            CounterEvent.Decremented -> copy(count = count - 1)
+        }
+    }
+    
+    content { state, onAction ->
+        CounterUI(state = state, onAction = onAction)
+    }
+}
+
+// Use the component
 @Composable
-fun CounterScreen(viewModel: CounterViewModel) {
+fun MyScreen() {
+    counterComponent.Component()
+}
+```
+
+## 🧭 Navigation Integration
+
+Integrate with Compass Core navigation:
+
+```kotlin
+sealed class UserEffect : Effect {
+    data class NavigateToProfile(val userId: String) : UserEffect()
+    object NavigateBack : UserEffect()
+}
+
+@Composable
+fun UserScreen(viewModel: UserViewModel) {
     val navController = LocalNavController.current
     
     StateContent(
         viewModel = viewModel,
         onEffect = { effect ->
             when (effect) {
-                CounterEffect.NavigateToSettings -> {
-                    navController.navigate(ScreenId("settings"))
+                is UserEffect.NavigateToProfile -> {
+                    navController.navigate(
+                        ScreenId("profile"),
+                        NavOptions(
+                            params = buildParams {
+                                putString("userId", effect.userId)
+                            }.toStringMap()
+                        )
+                    )
                 }
-                is CounterEffect.ShowToast -> {
-                    // Show toast
-                }
+                UserEffect.NavigateBack -> navController.popBackStack()
             }
         }
     ) { state, onAction ->
-        // Your UI content
-        CounterContent(
-            state = state,
-            onAction = onAction,
-            onNavigateToSettings = { onAction(CounterAction.NavigateToSettings) }
-        )
+        UserContent(state = state, onAction = onAction)
     }
 }
 ```
 
 ## 🧪 Testing
 
-Testing is straightforward with pure functions and immutable data:
+Testing is straightforward with pure functions:
 
 ```kotlin
 @Test
-fun `incrementing should increase count`() = runTest {
+fun `should increment count when increment action is processed`() = runTest {
     val viewModel = CounterViewModel()
     
     viewModel.handleAction(CounterAction.Increment)
@@ -376,53 +377,79 @@ fun `state reduction should be pure`() {
     }
     
     assertEquals(6, newState.count)
-    // Original state unchanged
-    assertEquals(5, initialState.count)
+    assertEquals(5, initialState.count) // Original unchanged
+}
+
+@Test
+fun `should emit effect when count reaches maximum`() = runTest {
+    val viewModel = CounterViewModel()
+    val effects = mutableListOf<CounterEffect>()
+    
+    val job = launch {
+        viewModel.effect.collect { effects.add(it) }
+    }
+    
+    // Increment to maximum
+    repeat(10) {
+        viewModel.handleAction(CounterAction.Increment)
+    }
+    
+    assertTrue(effects.any { it is CounterEffect.ShowToast })
+    job.cancel()
 }
 ```
 
-## 📚 Documentation
+## 🎯 Best Practices
 
-- **[API Documentation](API.md)** - Complete API reference
-- **[Examples & Migration Guide](EXAMPLES.md)** - Real-world examples and migration from other
-  libraries
+### State Design
+
+- Keep states **immutable** and **small**
+- Use `@Immutable` or `@Stable` for Compose optimization
+- Derive computed properties from basic state
+- Avoid nested mutable collections
+
+### Action Design
+
+- Make actions **granular** and **focused**
+- Include all necessary data in parameters
+- Use **descriptive names** representing user intent
+- Avoid actions combining multiple concerns
+
+### Event Design
+
+- Name events with **past tense verbs**
+- Include all data needed for state reduction
+- Keep events focused on **single state changes**
+- Use sealed classes for type safety
+
+### Effect Design
+
+- Use effects for **one-time actions** only
+- Don't modify application state with effects
+- Keep effect handling in the **UI layer**
+- Make effects serializable when possible
+
+## 🌐 Platform Support
+
+| Platform | StateViewModel | FlowStateViewModel | ContentState | DSL Support |
+|----------|----------------|--------------------|--------------|-------------|
+| Android  | ✅              | ✅                  | ✅            | ✅           |
+| iOS      | ✅              | ✅                  | ✅            | ✅           |
+| Desktop  | ✅              | ✅                  | ✅            | ✅           |
+| Web      | ✅              | ✅                  | ✅            | ✅           |
+
+## 📖 Documentation
+
+- **[API Reference](API.md)** - Complete API documentation
+- **[Examples](EXAMPLES.md)** - Real-world examples and migration guides
+- **[Getting Started](GETTING_STARTED.md)** - Step-by-step tutorial
 - **[Changelog](CHANGELOG.md)** - Version history and breaking changes
 
-## 🤝 Contributing
+## 🔗 Integration
 
-We welcome contributions! Please see our contributing guidelines for details.
-
-### Development Setup
-
-```bash
-git clone https://github.com/usmonie/compass.git
-cd compass/state
-./gradlew build
-```
-
-## 📄 License
-
-```
-Copyright 2024 Compass
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-```
-
-## 🔗 Related Projects
-
-- **[Compass Navigation](../core/)** - Type-safe navigation for Kotlin Multiplatform
-- **[Compass Core](../core/)** - Core utilities and navigation system
+- **[Compass Core](../core/README.md)** - Navigation system integration
+- **[Main Documentation](../README.md)** - Complete project overview
 
 ---
 
-**Made with ❤️ by the Compass team**
+**Part of the [Compass](../README.md) Kotlin Multiplatform library suite**

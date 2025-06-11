@@ -1,142 +1,142 @@
-# Compass Multiplatform Navigation Library
+# Compass - Kotlin Multiplatform Navigation & State Management
 
-## Overview
+[![Maven Central](https://img.shields.io/maven-central/v/com.usmonie.compass/core.svg)](https://search.maven.org/search?q=g:com.usmonie.compass)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Kotlin](https://img.shields.io/badge/kotlin-multiplatform-orange.svg)](https://kotlinlang.org/docs/multiplatform.html)
 
-This library facilitates navigation for Compose Multiplatform applications on iOS, Android, Web, PC (Windows), and Mac. It provides a structured and type-safe way to navigate between screens, handle deep links, and manage screen states.
+> **This file is deprecated. Please see the main [README.md](../README.md) for current
+documentation.**
 
-## Key Features
+A modern, type-safe navigation and state management solution for Kotlin Multiplatform projects.
 
-- **Route Management**: Define and manage routes for different screens.
-- **Parameter Passing**: Pass parameters between routes.
-- **Transition Animations**: Customize screen transition animations.
-- **Back Navigation**: Handle back navigation with stack management.
-- **Deep Linking**: Navigate directly to specific screens using URIs.
-- **Extras**: Pass additional data during navigation.
-- **Screen Builders**: Type-safe way to create screens with parameters.
+## 📁 Project Structure
 
-## Getting Started
-
-### 1. **Define a Screen**
-
-All screens should implement the `Screen` interface. For screens that support deep linking, implement the `DeepLinkScreen` interface.
-
-```kotlin
-class HomeScreen : Screen() {
-    override val id: String
-        get() = ID
-
-    @Composable
-    override fun Content() {
-        Text("Home Screen Graph 1")
-    }
-
-    companion object Builder : ScreenBuilder {
-        const val ID = "HomeScreen"
-        override val id: String
-            get() = ID
-
-        override fun build(params: Map<String, String>?, extra: Extra?): Screen {
-            return HomeScreen()
-        }
-    }
-}
-
-class ArticleScreen(private val params: Map<String, String>?, private val extra: Extra?) : Screen() {
-
-    override val id: String
-        get() = ID
-
-    @Composable
-    override fun Content() {
-        val id = params?.get("articleId") ?: ""
-        Text("id: $id")
-    }
-
-    companion object Builder: BaseDeepLinkScreenBuilder() {
-        const val ID = "ArticleScreen"
-        override val deepLinkPattern: String
-            get() = "app://article/{articleId}"
-
-        override val id: String
-            get() = ID
-
-        override fun build(params: Map<String, String>?, extra: Extra?): Screen {
-            return ArticleScreen(params, extra)
-        }
-    }
-}
+```
+compass/
+├── core/                   # Navigation library
+│   ├── src/
+│   │   ├── commonMain/    # Common navigation code
+│   │   ├── androidMain/   # Android-specific implementation
+│   │   ├── iosMain/       # iOS-specific implementation
+│   │   └── commonTest/    # Navigation tests
+│   └── README.md          # Core documentation
+├── state/                  # State management (MVI) library
+│   ├── src/
+│   │   ├── commonMain/    # Common MVI code
+│   │   ├── androidMain/   # Android-specific state management
+│   │   ├── iosMain/       # iOS-specific state management
+│   │   └── commonTest/    # State management tests
+│   ├── README.md          # State documentation
+│   ├── API.md             # Complete API reference
+│   ├── EXAMPLES.md        # Real-world examples
+│   └── GETTING_STARTED.md # Step-by-step tutorial
+└── sample/                 # Example applications
+    └── src/
+        └── commonMain/
 ```
 
-### 2. **Setup the RouteManager**
+## 🚀 Quick Navigation
 
-The `RouteManager` is responsible for managing navigation. Initialize it with a set of routes:
+- **[📘 Main Documentation](../README.md)** - Complete project overview
+- **[🧭 Navigation Guide](core/README.md)** - Compass Core documentation
+- **[🏗️ State Management Guide](state/README.md)** - Compass State documentation
+- **[🔧 API Reference](state/API.md)** - Detailed API documentation
+- **[📖 Examples](state/EXAMPLES.md)** - Real-world usage examples
+- **[🎯 Getting Started](state/GETTING_STARTED.md)** - Step-by-step tutorial
 
+## 🏛️ Architecture Overview
+
+### 🧭 Navigation (Compass Core)
+```
+NavController → NavigationEngine → ScreenDestination
+     ↑                                      ↓
+TypedParams ←── DeepLinkHandler ←── NavigationResult
+```
+
+**Key Components:**
+
+- `NavController` - Main navigation controller
+- `ScreenDestination` - Base class for screens
+- `TypedParams` - Type-safe parameters
+- `DeepLinkHandler` - Deep link processing
+- `NavigationResult` - Result communication
+
+### 🏗️ State Management (Compass State)
+```
+User Action → ActionProcessor → Event → StateManager → New State
+                                 ↓
+                           EventHandler → Effect (Optional)
+```
+
+**Key Components:**
+
+- `State` - Immutable application state
+- `Action` - User interactions
+- `Event` - Internal state change events
+- `Effect` - One-time side effects
+- `StateViewModel` / `FlowStateViewModel` - State management
+
+## 💻 Code Examples
+
+### Navigation
 ```kotlin
-val routeManager = RouteManager(
-    routes = mapOf(
-        "HomeScreen" to HomeScreen.Builder,
-        "ArticleScreen" to ArticleScreen.Builder,
-        // ... other routes ...
+// Navigate with type-safe parameters
+navController.navigate(
+    ScreenId("profile"),
+    NavOptions(
+        params = buildParams {
+            putString("userId", "123")
+            putInt("tab", 2)
+        }.toStringMap()
     )
 )
 ```
 
-### 3. **Navigate Between Screens**
-
-Use the `navigateTo` method to navigate between screens:
-
+### State Management
 ```kotlin
-routeManager.navigateTo("HomeScreen")
-```
+class CounterViewModel : StateViewModel<CounterState, CounterAction, CounterEvent, CounterEffect>(
+    initialState = CounterState()
+) {
+    override suspend fun processAction(action: CounterAction): CounterEvent = when (action) {
+        CounterAction.Increment -> CounterEvent.Incremented
+        CounterAction.Decrement -> CounterEvent.Decremented
+    }
 
-To pass parameters or extras:
+    override fun CounterState.reduce(event: CounterEvent): CounterState = when (event) {
+        CounterEvent.Incremented -> copy(count = count + 1)
+        CounterEvent.Decremented -> copy(count = count - 1)
+    }
 
-```kotlin
-routeManager.navigateTo("ArticleScreen", params = mapOf("articleId" to "12345"))
-```
-
-### 4. **Handle Back Navigation**
-
-Use the `navigateBack` method to handle back navigation:
-
-```kotlin
-routeManager.navigateBack()
-```
-
-### 5. **Deep Linking**
-
-To handle deep links, use the `handleDeepLink` method:
-
-```kotlin
-routeManager.handleDeepLink("app://article/12345")
-```
-
-## Advanced Features
-
-### Screen Builders
-
-For screens that require parameters, use a screen builder:
-
-```kotlin
-class ArticleScreenBuilder : ScreenBuilder<ArticleScreen> {
-    override fun build(params: Map<String, String>?): ArticleScreen {
-        val articleId = params?.get("articleId") ?: ""
-        return ArticleScreen(articleId)
+    override suspend fun handleEvent(event: CounterEvent): CounterEffect? = when (event) {
+        CounterEvent.Incremented -> {
+            if (state.value.count >= 10) CounterEffect.ShowToast("Max reached!") else null
+        }
+        else -> null
     }
 }
 ```
 
-### Extras
+## 🎯 Platform Support
 
-To pass additional data during navigation, use extras:
+| Platform | Navigation | State Management | Web Support |
+|----------|------------|------------------|-------------|
+| Android  | ✅          | ✅                | N/A         |
+| iOS      | ✅          | ✅                | N/A         |
+| Desktop  | ✅          | ✅                | N/A         |
+| Web      | ✅          | ✅                | ✅           |
+
+## 📦 Installation
 
 ```kotlin
-data class SpecialConfigExtra(val config: SpecialConfig) : Extra {
-    override val key = "specialConfig"
-    override val data get() = config
+dependencies {
+    // Navigation
+    implementation("com.usmonie.compass:core:0.2.0")
+    
+    // State Management (MVI)
+    implementation("com.usmonie.compass:state:0.2.0")
 }
 ```
 
-## Conclusion
+---
 
-The Compass Multiplatform Navigation Library provides a robust and flexible solution for navigating between screens in a multiplatform application. With support for deep linking, extras, and screen builders, it offers a comprehensive set of features to handle all your navigation needs.
+**For complete and up-to-date documentation, please visit the [main README](../README.md).**
