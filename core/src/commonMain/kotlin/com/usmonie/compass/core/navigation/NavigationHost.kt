@@ -95,7 +95,7 @@ public fun NavigationHost(
                     AnimatedContent(
                         targetState = current,
                         transitionSpec = { getTransition(animState) },
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier,
                     ) { destination ->
                         navController.SaveableStateProvider(destination) {
                             destination.Content()
