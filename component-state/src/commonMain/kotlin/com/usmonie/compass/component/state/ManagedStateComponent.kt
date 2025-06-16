@@ -1,4 +1,4 @@
-package com.usmonie.compass.state
+package com.usmonie.compass.component.state
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -9,12 +9,13 @@ import androidx.compose.runtime.remember
  * A managed StateComponent that provides commonly used state operations
  */
 public abstract class ManagedStateComponent<
-        S : State,
-        A : Action,
-        V : Event,
-        F : Effect,
-        VM : StateViewModel<S, A, V, F>
-        >(viewModel: VM) : StateComponent<S, A, V, F, VM>(viewModel) {
+        S : com.usmonie.compass.state.State,
+        A : com.usmonie.compass.state.Action,
+        V : com.usmonie.compass.state.Event,
+        F : com.usmonie.compass.state.Effect,
+        VM : com.usmonie.compass.state.StateViewModel<S, A, V, F>
+        >(viewModel: VM) :
+    StateComponent<S, A, V, F, VM>(viewModel) {
 
     @Composable
     override fun Render() {
@@ -52,11 +53,11 @@ public abstract class ManagedStateComponent<
  */
 @Composable
 public inline fun <
-        S : State,
-        A : Action,
-        V : Event,
-        F : Effect,
-        VM : StateViewModel<S, A, V, F>
+        S : com.usmonie.compass.state.State,
+        A : com.usmonie.compass.state.Action,
+        V : com.usmonie.compass.state.Event,
+        F : com.usmonie.compass.state.Effect,
+        VM : com.usmonie.compass.state.StateViewModel<S, A, V, F>
         > StatefulComponent(
     viewModel: VM,
     crossinline onEffect: suspend (F) -> Unit = {},

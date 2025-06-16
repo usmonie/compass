@@ -70,7 +70,7 @@ public fun NavigationHost(
     navController: NavController,
     modifier: Modifier = Modifier,
     gestureEnabled: Boolean = true,
-    backgroundColor: Brush = Brush.verticalGradient(listOf(Color.White)),
+    backgroundColor: Brush = Brush.verticalGradient(listOf(Color.White, Color.White)),
 ) {
     CompositionLocalProvider(LocalNavController provides navController) {
         val currentDestination by navController.currentDestination.collectAsState()

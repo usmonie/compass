@@ -1,4 +1,4 @@
-package com.usmonie.compass.mvi
+package com.usmonie.compass.screen.state
 
 import com.usmonie.compass.core.navigation.ScreenDestination
 import com.usmonie.compass.core.navigation.ScreenId

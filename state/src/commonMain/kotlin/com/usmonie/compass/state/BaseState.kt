@@ -1,6 +1,5 @@
 package com.usmonie.compass.state
 
-import androidx.compose.runtime.Stable
 
 /**
  * Base interface for representing the state in MVI architecture.
@@ -26,7 +25,6 @@ import androidx.compose.runtime.Stable
  * ) : State
  * ```
  */
-@Stable
 public interface State
 
 /**
@@ -48,7 +46,6 @@ public interface State
  * ) : State
  * ```
  */
-@Stable
 public abstract class ErrorState(error: Throwable) : State {
     /**
      * The error message, defaulting to "Unknown error" if null

@@ -3,20 +3,22 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.androidLibrary)
     id("maven-publish")
 }
 
-group = "com.usmonie.compass.state"
+group = "com.usmonie.compass.component.state"
 version = "0.2.0"
 
 publishing {
     publications {
         withType<MavenPublication> {
             pom {
-                name.set("Compass State")
-                description.set("Pure MVI state management library for Kotlin Multiplatform - no UI dependencies")
-                url.set("https://github.com/usmonie/compass/")
+                name.set("Compass Component State")
+                description.set("Compose UI components for MVI state management library")
+                url.set("https://github.com/usmonie/compass")
 
                 licenses {
                     license {
@@ -107,7 +109,7 @@ kotlin {
         iosSimulatorArm64()
     ).forEach {
         it.binaries.framework {
-            baseName = "CompassState"
+            baseName = "CompassComponentState"
             isStatic = true
         }
     }
@@ -115,7 +117,6 @@ kotlin {
     // Desktop JVM target
     jvm()
 
-    // Убираем проблемные native targets временно
     // Linux Native targets
     // linuxX64()
     // linuxArm64()
@@ -147,7 +148,6 @@ kotlin {
         }
     }
 
-    // WASM target (экспериментальный)
     if (project.findProperty("compass.enable.wasm") == "true") {
         @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
         wasmJs {
@@ -168,13 +168,29 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(libs.androidx.collections)
-            api(libs.kotlinx.coroutines.core)
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.ui)
+            api(projects.compass.core)
+            api(projects.compass.state)
         }
 
         commonTest.dependencies {
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
+        }
+
+        androidMain.dependencies {
+            implementation(compose.uiTooling)
+            implementation(libs.androidx.activity.compose)
+        }
+
+        jvmMain.dependencies {
+            implementation(compose.desktop.common)
+        }
+
+        jsMain.dependencies {
+            implementation(compose.html.core)
         }
     }
 }

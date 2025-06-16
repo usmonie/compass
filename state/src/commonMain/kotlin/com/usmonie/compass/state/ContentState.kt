@@ -1,6 +1,5 @@
 package com.usmonie.compass.state
 
-import androidx.compose.runtime.Immutable
 
 /**
  * A sealed class that represents different content loading states in a type-safe way.
@@ -31,7 +30,6 @@ import androidx.compose.runtime.Immutable
  * }
  * ```
  */
-@Immutable
 public sealed class ContentState<T>(public val item: T?) {
     /**
      * Represents a successful state with loaded data.

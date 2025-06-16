@@ -1,7 +1,9 @@
-package com.usmonie.compass.mvi
+package com.usmonie.compass.screen.state
 
 import androidx.collection.ScatterMap
 import androidx.compose.runtime.Composable
+import com.usmonie.compass.component.state.SimpleStateContent
+import com.usmonie.compass.component.state.StateContent
 import com.usmonie.compass.core.Extra
 import com.usmonie.compass.core.navigation.ScreenDestination
 import com.usmonie.compass.core.navigation.ScreenId
@@ -9,9 +11,7 @@ import com.usmonie.compass.state.Action
 import com.usmonie.compass.state.Effect
 import com.usmonie.compass.state.Event
 import com.usmonie.compass.state.FlowStateViewModel
-import com.usmonie.compass.state.SimpleStateContent
 import com.usmonie.compass.state.State
-import com.usmonie.compass.state.StateContent
 import com.usmonie.compass.state.StateViewModel
 import com.usmonie.compass.state.createStateViewModel
 import com.usmonie.compass.state.flowStateViewModel
@@ -262,12 +262,16 @@ public class SimpleStateScreenDestination<S : State>(
 ) : ScreenDestination(id, storeInBackStack) {
 
     // Simple actions and events for basic state updates
-    private sealed class SimpleAction<S : State> : Action {
-        data class UpdateState<S : State>(val newState: S) : SimpleAction<S>()
+    private sealed class SimpleAction<S : State> :
+        Action {
+        data class UpdateState<S : State>(val newState: S) :
+            SimpleAction<S>()
     }
 
-    private sealed class SimpleEvent<S : State> : Event {
-        data class StateUpdated<S : State>(val newState: S) : SimpleEvent<S>()
+    private sealed class SimpleEvent<S : State> :
+        Event {
+        data class StateUpdated<S : State>(val newState: S) :
+            SimpleEvent<S>()
     }
 
     private val viewModel = createStateViewModel<S, SimpleAction<S>, SimpleEvent<S>, Nothing>(

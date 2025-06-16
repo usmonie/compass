@@ -1,22 +1,27 @@
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.androidLibrary)
     id("maven-publish")
+    // id("signing") // Removed temporarily to fix linter errors, will configure signing later
 }
 
-group = "com.usmonie.compass.state"
+group = "com.usmonie.compass.screen.state"
 version = "0.2.0"
 
 publishing {
     publications {
         withType<MavenPublication> {
+            // POM configuration required by Maven Central
             pom {
-                name.set("Compass State")
-                description.set("Pure MVI state management library for Kotlin Multiplatform - no UI dependencies")
-                url.set("https://github.com/usmonie/compass/")
+                name.set("Compass Core")
+                description.set("Type-safe navigation library for Kotlin Multiplatform with Jetpack Compose integration")
+                url.set("https://github.com/usmonie/compass")
 
                 licenses {
                     license {
@@ -42,10 +47,12 @@ publishing {
         }
     }
 
+    // Configure repository
     repositories {
+        // Maven Local repository for local development
         mavenLocal()
 
-        // GitLab Maven repository (conditional)
+        // GitLab Maven repository (conditional and exclusive when enabled)
         if (project.hasProperty("enableGitlabPublish")) {
             val gitlabProjectId = project.findProperty("gitlabProjectId") as String?
                 ?: System.getenv("GITLAB_PROJECT_ID")
@@ -68,7 +75,7 @@ publishing {
                 }
             }
         }
-        // GitHub Packages repository (conditional)
+        // GitHub Packages repository (conditional and exclusive when enabled)  
         else if (project.hasProperty("enableGithubPublish")) {
             val githubUsername = project.findProperty("githubUsername") as String?
                 ?: System.getenv("GITHUB_USERNAME") ?: "usmonie"
@@ -87,14 +94,36 @@ publishing {
                     }
                 }
             }
+        } else {
+            // Default repositories only when not publishing to GitLab or GitHub
+            maven {
+                name = "OSSRH"
+                url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+                credentials {
+                    username =
+                        System.getenv("OSSRH_USERNAME") ?: findProperty("ossrhUsername") as String?
+                    password =
+                        System.getenv("OSSRH_PASSWORD") ?: findProperty("ossrhPassword") as String?
+                }
+            }
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/usmonie/compass")
+                credentials {
+                    username =
+                        System.getenv("GITHUB_USERNAME") ?: findProperty("gpr.user") as String?
+                    password = System.getenv("GITHUB_TOKEN") ?: findProperty("gpr.key") as String?
+                }
+            }
         }
     }
 }
 
 kotlin {
-    jvmToolchain(23)
+    jvmToolchain(23) // Changed from 17 to 23 to match installed Java version
     androidTarget {
         publishLibraryVariants("release")
+        //https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-test.html
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test)
     }
@@ -107,7 +136,7 @@ kotlin {
         iosSimulatorArm64()
     ).forEach {
         it.binaries.framework {
-            baseName = "CompassState"
+            baseName = "CompassScreenState"
             isStatic = true
         }
     }
@@ -115,7 +144,6 @@ kotlin {
     // Desktop JVM target
     jvm()
 
-    // Убираем проблемные native targets временно
     // Linux Native targets
     // linuxX64()
     // linuxArm64()
@@ -168,19 +196,38 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(libs.androidx.collections)
-            api(libs.kotlinx.coroutines.core)
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.ui)
+            implementation(libs.androidx.collections)
+            api(libs.ui.backhandler)
+            // Зависимости на другие compass модули
+            api(projects.compass.core)
+            api(projects.compass.componentState)
         }
 
         commonTest.dependencies {
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
         }
+
+        androidMain.dependencies {
+            implementation(compose.uiTooling)
+            implementation(libs.androidx.activity.compose)
+        }
+
+        jvmMain.dependencies {
+            implementation(compose.desktop.common)
+        }
+
+        jsMain.dependencies {
+            implementation(compose.html.core)
+        }
     }
 }
 
 android {
-    namespace = "com.usmonie.compass.state"
+    namespace = "com.usmonie.compass.core"
     compileSdk = 35
 
     defaultConfig {
@@ -192,3 +239,39 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
 }
+
+compose.desktop {
+    application {
+        mainClass = "MainKt"
+
+        nativeDistributions {
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            packageName = "Compass Core"
+            packageVersion = "1.0.0"
+
+            linux {
+                iconFile.set(project.file("desktopAppIcons/LinuxIcon.png"))
+            }
+            windows {
+                iconFile.set(project.file("desktopAppIcons/WindowsIcon.ico"))
+            }
+            macOS {
+                iconFile.set(project.file("desktopAppIcons/MacosIcon.icns"))
+                bundleID = "com.usmonie.compass.core.desktopApp"
+            }
+        }
+    }
+}
+
+// Configure signing for Maven Central
+// signing {
+//     val signingKey: String? by project
+//     val signingPassword: String? by project
+//     useInMemoryPgpKeys(signingKey, signingPassword)
+//     sign(publishing.publications)
+// }
+
+// Only sign when publishing to Maven Central
+// tasks.withType<Sign>().configureEach {
+//     onlyIf { !gradle.taskGraph.hasTask(":publishToMavenLocal") }
+// }

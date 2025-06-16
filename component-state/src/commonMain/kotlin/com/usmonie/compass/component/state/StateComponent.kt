@@ -1,8 +1,14 @@
-package com.usmonie.compass.state
+package com.usmonie.compass.component.state
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
+import com.usmonie.compass.state.State
+import com.usmonie.compass.state.Action
+import com.usmonie.compass.state.Effect
+import com.usmonie.compass.state.Event
+import com.usmonie.compass.state.StateElement
+import com.usmonie.compass.state.StateViewModel
 
 /**
  * Base class for Composable components that manage state using the MVI pattern

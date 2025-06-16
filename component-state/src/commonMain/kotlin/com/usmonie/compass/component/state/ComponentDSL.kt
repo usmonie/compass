@@ -1,7 +1,16 @@
-package com.usmonie.compass.state
+package com.usmonie.compass.component.state
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import com.usmonie.compass.state.State
+import com.usmonie.compass.state.Action
+import com.usmonie.compass.state.Effect
+import com.usmonie.compass.state.Event
+import com.usmonie.compass.state.FlowStateViewModel
+import com.usmonie.compass.state.StateViewModel
+import com.usmonie.compass.state.createStateViewModel
+import com.usmonie.compass.state.flowStateViewModel
+import com.usmonie.compass.state.stateViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
