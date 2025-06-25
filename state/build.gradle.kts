@@ -7,8 +7,7 @@ plugins {
     id("maven-publish")
 }
 
-group = "com.usmonie.compass.state"
-version = "0.2.0"
+// Version and group are now set by compass-versions.gradle.kts
 
 publishing {
     publications {
@@ -169,7 +168,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(libs.androidx.collections)
-            api(libs.kotlinx.coroutines.core)
+            api(libs.coroutines.core)
         }
 
         commonTest.dependencies {

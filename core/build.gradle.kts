@@ -11,8 +11,7 @@ plugins {
     // id("signing") // Removed temporarily to fix linter errors, will configure signing later
 }
 
-group = "com.usmonie.compass.core"
-version = "0.2.0"
+// Version and group are now set by compass-versions.gradle.kts
 
 publishing {
     publications {

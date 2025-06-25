@@ -24,10 +24,10 @@ pattern with seamless Jetpack Compose integration.
 
 ```kotlin
 dependencies {
-    implementation("com.usmonie.compass:state:0.2.0")
+    implementation("com.usmonie.compass:state:0.2.1")
     
     // Optional: For navigation integration
-    implementation("com.usmonie.compass:core:0.2.0")
+    implementation("com.usmonie.compass:core:0.2.1")
 }
 ```
 

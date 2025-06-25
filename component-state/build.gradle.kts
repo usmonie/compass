@@ -9,8 +9,7 @@ plugins {
     id("maven-publish")
 }
 
-group = "com.usmonie.compass.component.state"
-version = "0.2.0"
+// Version and group are now set by compass-versions.gradle.kts
 
 publishing {
     publications {

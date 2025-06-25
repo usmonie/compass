@@ -25,7 +25,7 @@ Add the following to your `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("com.usmonie.compass:state:0.2.0")
+    implementation("com.usmonie.compass:state:0.2.1")
     
     // For testing
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")

@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Screen lifecycle methods now include navigation-aware callbacks
 - Some existing APIs updated to support navigation parameters
 
-## [0.2.0] - 2024-01-XX
+## [0.2.1] - 2024-01-XX
 
 ### Added
 

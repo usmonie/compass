@@ -94,7 +94,27 @@ public fun NavigationHost(
 
                     AnimatedContent(
                         targetState = current,
-                        transitionSpec = { getTransition(animState) },
+                        transitionSpec = {
+                            // Use the screen's defined transitions based on navigation direction
+                            when (animState) {
+                                NavigationAnimationState.NAVIGATING_FORWARD -> {
+                                    val enterTransition = targetState.enterTransition(this)
+                                    val exitTransition = initialState.exitTransition(this)
+                                    enterTransition togetherWith exitTransition
+                                }
+
+                                NavigationAnimationState.NAVIGATING_BACKWARD -> {
+                                    val popEnterTransition = targetState.popEnterTransition(this)
+                                    val popExitTransition = initialState.popExitTransition(this)
+                                    popEnterTransition togetherWith popExitTransition
+                                }
+
+                                NavigationAnimationState.NONE -> {
+                                    // No animation
+                                    fadeIn(tween(0)) togetherWith fadeOut(tween(0))
+                                }
+                            }
+                        },
                         modifier = Modifier,
                     ) { destination ->
                         navController.SaveableStateProvider(destination) {
@@ -127,7 +147,9 @@ private fun BackGestureHandler(
 
 /**
  * Returns the appropriate transition based on navigation state
+ * @deprecated Use screen-defined transitions instead
  */
+@Deprecated("Use screen-defined transitions instead of hardcoded transitions")
 private fun getTransition(animState: NavigationAnimationState): ContentTransform {
     return when (animState) {
         NavigationAnimationState.NONE ->
