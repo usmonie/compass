@@ -3,8 +3,13 @@
 package com.usmonie.compass.component.state
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.compositionLocalOf
+import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavEntryDecorator
+import androidx.navigation3.runtime.navEntryDecorator
 import com.usmonie.compass.state.*
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
@@ -122,3 +127,16 @@ public fun <T> ContentState<T>.onLoading(action: @Composable () -> Unit): Conten
     }
     return this
 }
+
+/**
+ * Composition local for accessing the current StateViewModel from navigation context
+ */
+public val LocalStateViewModel: androidx.compose.runtime.CompositionLocal<StateViewModel<*, *, *, *>?> = compositionLocalOf<StateViewModel<*, *, *, *>?> { null }
+
+/**
+ * Composition local for accessing the current FlowStateViewModel from navigation context
+ */
+public val LocalFlowStateViewModel: androidx.compose.runtime.CompositionLocal<FlowStateViewModel<*, *, *, *>?> = compositionLocalOf<FlowStateViewModel<*, *, *, *>?> { null }
+
+// TODO: NavEntryDecorator integration will be implemented in a future version
+// The current androidx.navigation3 implementation needs additional work for proper decorator support

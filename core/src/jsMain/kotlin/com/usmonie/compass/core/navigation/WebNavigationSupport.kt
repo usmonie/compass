@@ -10,15 +10,13 @@ import org.w3c.dom.events.Event
  * JS implementation of WebNavigationSupport that integrates with browser history
  */
 public actual class WebNavigationSupport {
-    private var navController: NavController? = null
     private var deepLinkHandler: DeepLinkHandler? = null
     private var isActive = false
 
     /**
      * Initialize web navigation binding
      */
-    public actual fun initialize(navController: NavController, deepLinkHandler: DeepLinkHandler) {
-        this.navController = navController
+    public actual fun initialize(deepLinkHandler: DeepLinkHandler) {
         this.deepLinkHandler = deepLinkHandler
     }
 
@@ -26,7 +24,7 @@ public actual class WebNavigationSupport {
      * Bind to the browser's history
      */
     public actual fun bindToBrowserHistory() {
-        if (isActive || navController == null || deepLinkHandler == null) return
+        if (isActive || deepLinkHandler == null) return
 
         // Set up popstate listener to handle browser back button
         window.addEventListener("popstate", { event ->
@@ -109,7 +107,6 @@ public actual class WebNavigationSupport {
      * Handle URL changes by parsing the path and navigating
      */
     private fun handleUrlChange(path: String) {
-        val navController = this.navController ?: return
         val deepLinkHandler = this.deepLinkHandler ?: return
 
         // Try to parse the URL as a deep link
@@ -118,26 +115,14 @@ public actual class WebNavigationSupport {
         when (result) {
             is DeepLinkResult.Screen -> {
                 // Navigate to screen with parsed parameters
-                navController.navigate(
-                    result.screenId,
-                    NavOptions(
-                        storeInBackStack = true,
-                        extras = null,
-                        params = result.params.toStringMap()
-                    )
-                )
+                // Navigation will be handled via composition local
+                println("Navigate to screen: ${result.screenId}")
             }
 
             is DeepLinkResult.Graph -> {
-                // Navigate to graph with parsed parameters
-                navController.navigateToGraph(
-                    result.graphId,
-                    NavOptions(
-                        storeInBackStack = true,
-                        extras = null,
-                        params = result.params.toStringMap()
-                    )
-                )
+                // Navigate to graph with parsed parameters  
+                // Navigation will be handled via composition local
+                println("Navigate to graph: ${result.graphId}")
             }
 
             null -> {

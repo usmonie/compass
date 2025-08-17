@@ -7,119 +7,17 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.kotlin.serialization)
     id("maven-publish")
     // id("signing") // Removed temporarily to fix linter errors, will configure signing later
 }
 
-// Version and group are now set by compass-versions.gradle.kts
+// Version and group are now set by gradle/compass-versions.gradle.kts
 
-publishing {
-    publications {
-        withType<MavenPublication> {
-            // POM configuration required by Maven Central
-            pom {
-                name.set("Compass Core")
-                description.set("Type-safe navigation library for Kotlin Multiplatform with Jetpack Compose integration")
-                url.set("https://github.com/usmonie/compass")
-
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-
-                developers {
-                    developer {
-                        id.set("usmonie")
-                        name.set("Compass Team")
-                        email.set("compass@usmonie.com")
-                    }
-                }
-
-                scm {
-                    connection.set("scm:git:git://github.com/usmonie/compass.git")
-                    developerConnection.set("scm:git:ssh://github.com/usmonie/compass.git")
-                    url.set("https://github.com/usmonie/compass")
-                }
-            }
-        }
-    }
-
-    // Configure repository
-    repositories {
-        // Maven Local repository for local development
-        mavenLocal()
-
-        // GitLab Maven repository (conditional and exclusive when enabled)
-        if (project.hasProperty("enableGitlabPublish")) {
-            val gitlabProjectId = project.findProperty("gitlabProjectId") as String?
-                ?: System.getenv("GITLAB_PROJECT_ID")
-            val gitlabToken = project.findProperty("gitlabToken") as String?
-                ?: System.getenv("GITLAB_TOKEN")
-            val gitlabUrl = project.findProperty("gitlabUrl") as String?
-                ?: "https://gitlab.coinkeep.com/api/v4/projects/$gitlabProjectId/packages/maven"
-
-            if (gitlabToken != null && gitlabProjectId != null) {
-                maven {
-                    name = "GitLab"
-                    url = uri(gitlabUrl)
-                    credentials(HttpHeaderCredentials::class) {
-                        name = "Private-Token"
-                        value = gitlabToken
-                    }
-                    authentication {
-                        create("header", HttpHeaderAuthentication::class)
-                    }
-                }
-            }
-        }
-        // GitHub Packages repository (conditional and exclusive when enabled)  
-        else if (project.hasProperty("enableGithubPublish")) {
-            val githubUsername = project.findProperty("githubUsername") as String?
-                ?: System.getenv("GITHUB_USERNAME") ?: "usmonie"
-            val githubRepository = project.findProperty("githubRepository") as String?
-                ?: System.getenv("GITHUB_REPOSITORY") ?: "compass"
-            val githubToken = project.findProperty("githubToken") as String?
-                ?: System.getenv("GITHUB_TOKEN")
-
-            if (githubToken != null) {
-                maven {
-                    name = "GitHubPackages"
-                    url = uri("https://maven.pkg.github.com/$githubUsername/$githubRepository")
-                    credentials {
-                        username = githubUsername
-                        password = githubToken
-                    }
-                }
-            }
-        } else {
-            // Default repositories only when not publishing to GitLab or GitHub
-            maven {
-                name = "OSSRH"
-                url = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
-                credentials {
-                    username =
-                        System.getenv("OSSRH_USERNAME") ?: findProperty("ossrhUsername") as String?
-                    password =
-                        System.getenv("OSSRH_PASSWORD") ?: findProperty("ossrhPassword") as String?
-                }
-            }
-            maven {
-                name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/usmonie/compass")
-                credentials {
-                    username =
-                        System.getenv("GITHUB_USERNAME") ?: findProperty("gpr.user") as String?
-                    password = System.getenv("GITHUB_TOKEN") ?: findProperty("gpr.key") as String?
-                }
-            }
-        }
-    }
-}
+// Publishing configuration is handled by gradle/compass-versions.gradle.kts
 
 kotlin {
-    jvmToolchain(23) // Changed from 17 to 23 to match installed Java version
+    jvmToolchain(23)
     androidTarget {
         publishLibraryVariants("release")
         //https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-test.html
@@ -200,6 +98,12 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.ui)
             implementation(libs.androidx.collections)
+
+            implementation(libs.kotlinx.serialization.json)
+
+            implementation(libs.androidx.navigationevent)
+            implementation(libs.androidx.navigationevent.compose)
+
             api(libs.ui.backhandler)
         }
 
@@ -211,6 +115,9 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.uiTooling)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.savedstate.ktx)
+            implementation(libs.lifecycle.runtime.compose)
+            implementation(libs.androidx.lifecycle.runtime.ktx)
         }
 
         // iOS dependencies
@@ -240,10 +147,10 @@ kotlin {
 
 android {
     namespace = "com.usmonie.compass.core"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 23
     }
 
     compileOptions {

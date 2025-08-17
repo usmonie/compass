@@ -10,14 +10,12 @@ import kotlinx.coroutines.flow.emptyFlow
  * that allows the code to compile but doesn't provide actual web functionality.
  */
 public actual class WebNavigationSupport {
-    private var navController: NavController? = null
     private var deepLinkHandler: DeepLinkHandler? = null
 
     /**
      * Initialize web navigation binding - minimal implementation for native
      */
-    public actual fun initialize(navController: NavController, deepLinkHandler: DeepLinkHandler) {
-        this.navController = navController
+    public actual fun initialize(deepLinkHandler: DeepLinkHandler) {
         this.deepLinkHandler = deepLinkHandler
     }
 

@@ -1,7 +1,11 @@
 package com.usmonie.compass.core.navigation
 
-import com.usmonie.compass.core.Extra
+import androidx.navigation3.runtime.NavKey
+import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmInline
 
+@Serializable
 @JvmInline
-public value class ScreenId(public val id: String): Extra
+public value class ScreenId(public val id: String) : NavKey {
+    override fun toString(): String = id
+}

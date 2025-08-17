@@ -1,6 +1,5 @@
 package com.usmonie.compass.screen.state
 
-import com.usmonie.compass.core.navigation.ScreenDestination
 import com.usmonie.compass.core.navigation.ScreenId
 import com.usmonie.compass.state.Action
 import com.usmonie.compass.state.Effect
@@ -16,12 +15,12 @@ public abstract class StateScreen<
         F : Effect,
         VM : StateViewModel<S, A, V, F>
         >(
-    id: ScreenId,
+    public val id: ScreenId,
     override val viewModel: VM,
-    storeInBackStack: Boolean = true
-) : ScreenDestination(id, storeInBackStack), StateElement<S, A, V, F, VM> {
+    public val storeInBackStack: Boolean = true
+) : StateElement<S, A, V, F, VM> {
 
-    override fun onCleared() {
+    public override fun onCleared() {
         viewModel.onDispose()
     }
 }
