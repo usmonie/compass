@@ -8,13 +8,15 @@ import kotlinx.coroutines.flow.emptyFlow
  * Limited functionality as some browser APIs might not be fully available in WASM
  */
 public actual class WebNavigationSupport {
+    private var navController: NavController? = null
     private var deepLinkHandler: DeepLinkHandler? = null
     private var isActive = false
 
     /**
      * Initialize web navigation binding
      */
-    public actual fun initialize(deepLinkHandler: DeepLinkHandler) {
+    public actual fun initialize(navController: NavController, deepLinkHandler: DeepLinkHandler) {
+        this.navController = navController
         this.deepLinkHandler = deepLinkHandler
     }
 

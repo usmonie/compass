@@ -11,7 +11,7 @@ public expect class WebNavigationSupport {
     /**
      * Initialize web navigation binding
      */
-    public fun initialize(deepLinkHandler: DeepLinkHandler)
+    public fun initialize(navController: NavController, deepLinkHandler: DeepLinkHandler)
 
     /**
      * Bind to the browser's history
@@ -53,6 +53,7 @@ public expect class WebNavigationSupport {
  * Utility for connecting navigation system with web browser history
  */
 public class NavigationWebIntegration(
+    private val navController: NavController,
     private val deepLinkHandler: DeepLinkHandler,
     private val webSupport: WebNavigationSupport
 ) {
@@ -60,7 +61,7 @@ public class NavigationWebIntegration(
      * Initialize integration with web navigation
      */
     public fun initialize() {
-        webSupport.initialize(deepLinkHandler)
+        webSupport.initialize(navController, deepLinkHandler)
     }
 
     /**

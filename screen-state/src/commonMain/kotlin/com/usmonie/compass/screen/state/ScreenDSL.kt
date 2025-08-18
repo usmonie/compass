@@ -1,10 +1,11 @@
 package com.usmonie.compass.screen.state
 
+import androidx.collection.ScatterMap
 import androidx.compose.runtime.Composable
-import androidx.navigation3.runtime.EntryProviderBuilder
-import androidx.navigation3.runtime.NavEntry
 import com.usmonie.compass.component.state.SimpleStateContent
 import com.usmonie.compass.component.state.StateContent
+import com.usmonie.compass.core.Extra
+import com.usmonie.compass.core.navigation.ScreenDestination
 import com.usmonie.compass.core.navigation.ScreenId
 import com.usmonie.compass.state.Action
 import com.usmonie.compass.state.Effect
@@ -76,15 +77,15 @@ public class StateScreenBuilder<S : State, A : Action, V : Event, F : Effect> {
  * Screen destination that integrates with state management
  */
 public class StateScreenDestination<S : State, A : Action, V : Event, F : Effect>(
-    public val id: ScreenId,
-    public val storeInBackStack: Boolean,
+    id: ScreenId,
+    storeInBackStack: Boolean,
     private val viewModel: StateViewModel<S, A, V, F>,
     private val content: @Composable (S, (A) -> Unit) -> Unit,
     private val onEffect: suspend (F) -> Unit
-) {
+) : ScreenDestination(id, storeInBackStack) {
 
     @Composable
-    public fun Content() {
+    override fun Content() {
         StateContent(
             viewModel = viewModel,
             onEffect = onEffect,
@@ -92,7 +93,8 @@ public class StateScreenDestination<S : State, A : Action, V : Event, F : Effect
         )
     }
 
-    public fun onCleared() {
+    override fun onCleared() {
+        super.onCleared()
         viewModel.onDispose()
     }
 }
@@ -177,15 +179,15 @@ public class FlowStateScreenBuilder<S : State, A : Action, V : Event, F : Effect
  * Screen destination that integrates with state management and flow actions.
  */
 public class FlowStateScreenDestination<S : State, A : Action, V : Event, F : Effect>(
-    public val id: ScreenId,
-    public val storeInBackStack: Boolean,
+    id: ScreenId,
+    storeInBackStack: Boolean,
     private val viewModel: FlowStateViewModel<S, A, V, F>,
     private val content: @Composable (S, (A) -> Unit) -> Unit,
     private val onEffect: suspend (F) -> Unit
-) {
+) : ScreenDestination(id, storeInBackStack) {
 
     @Composable
-    public fun Content() {
+    override fun Content() {
         StateContent(
             viewModel = viewModel,
             onEffect = onEffect,
@@ -193,7 +195,8 @@ public class FlowStateScreenDestination<S : State, A : Action, V : Event, F : Ef
         )
     }
 
-    public fun onCleared() {
+    override fun onCleared() {
+        super.onCleared()
         viewModel.onDispose()
     }
 }
@@ -252,11 +255,11 @@ public class SimpleStateScreenBuilder<S : State> {
  * Simple state screen destination for basic state management
  */
 public class SimpleStateScreenDestination<S : State>(
-    public val id: ScreenId,
-    public val storeInBackStack: Boolean,
+    id: ScreenId,
+    storeInBackStack: Boolean,
     private val initialState: S,
     private val content: @Composable (S, (S) -> Unit) -> Unit
-) {
+) : ScreenDestination(id, storeInBackStack) {
 
     // Simple actions and events for basic state updates
     private sealed class SimpleAction<S : State> :
@@ -287,7 +290,7 @@ public class SimpleStateScreenDestination<S : State>(
     )
 
     @Composable
-    public fun Content() {
+    override fun Content() {
         SimpleStateContent(
             viewModel = viewModel,
             onEffect = {},
@@ -299,7 +302,8 @@ public class SimpleStateScreenDestination<S : State>(
         )
     }
 
-    public fun onCleared() {
+    override fun onCleared() {
+        super.onCleared()
         viewModel.onDispose()
     }
 }
@@ -327,167 +331,19 @@ public inline fun <S : State> simpleStateScreen(
 ): SimpleStateScreenDestination<S> = simpleStateScreen(ScreenId(id), storeInBackStack, builder)
 
 /**
- * DSL for building navigation graphs with androidx.navigation3 integration
+ * Helper function to create a screen factory from a state screen
  */
-public class Navigation3GraphBuilder {
-    private val entryProvider = StateNavEntryProvider()
-    
-    /**
-     * Add a state-managed screen to the navigation graph
-     */
-    public fun <S : State, A : Action, V : Event, F : Effect> screen(
-        screenId: ScreenId,
-        initialState: S,
-        processAction: suspend CoroutineScope.(A, S) -> V,
-        handleEvent: (V, S) -> F?,
-        reduce: S.(V) -> S,
-        onEffect: suspend (F) -> Unit = {},
-        metadata: Map<String, Any> = emptyMap(),
-        content: @Composable (S, (A) -> Unit) -> Unit
-    ) {
-        entryProvider.registerScreen(
-            screenId = screenId,
-            viewModelFactory = {
-                stateViewModel(
-                    initialState = initialState,
-                    processAction = processAction,
-                    handleEvent = handleEvent,
-                    reduce = reduce
-                )
-            },
-            content = { viewModel: StateViewModel<S, A, V, F> ->
-                StateContent(
-                    viewModel = viewModel,
-                    onEffect = onEffect,
-                    content = content
-                )
-            },
-            metadata = metadata
-        )
+public fun <S : State, A : Action, V : Event, F : Effect> FlowStateScreenDestination<S, A, V, F>.toFactory() =
+    { storeInBackStack: Boolean, params: ScatterMap<String, String>?, extra: Extra? ->
+        // Create a copy with the provided parameters
+        this
     }
-    
-    /**
-     * Add a flow state-managed screen to the navigation graph
-     */
-    public fun <S : State, A : Action, V : Event, F : Effect> flowScreen(
-        screenId: ScreenId,
-        initialState: S,
-        processAction: suspend CoroutineScope.(A, S) -> Flow<V>,
-        handleEvent: (V, S) -> F?,
-        reduce: S.(V) -> S,
-        onEffect: suspend (F) -> Unit = {},
-        metadata: Map<String, Any> = emptyMap(),
-        content: @Composable (S, (A) -> Unit) -> Unit
-    ) {
-        entryProvider.registerFlowScreen(
-            screenId = screenId,
-            viewModelFactory = {
-                flowStateViewModel(
-                    initialState = initialState,
-                    processAction = processAction,
-                    handleEvent = handleEvent,
-                    reduce = reduce
-                )
-            },
-            content = { viewModel ->
-                StateContent(
-                    viewModel = viewModel,
-                    onEffect = onEffect,
-                    content = content
-                )
-            },
-            metadata = metadata
-        )
-    }
-    
-    /**
-     * Add a simple state screen to the navigation graph
-     */
-    public fun <S : State> simpleScreen(
-        screenId: ScreenId,
-        initialState: S,
-        metadata: Map<String, Any> = emptyMap(),
-        content: @Composable (S, (S) -> Unit) -> Unit
-    ) {
-        screen<S, SimpleAction<S>, SimpleEvent<S>, Nothing>(
-            screenId = screenId,
-            initialState = initialState,
-            processAction = { action, _ ->
-                when (action) {
-                    is SimpleAction.UpdateState -> SimpleEvent.StateUpdated(action.newState)
-                }
-            },
-            handleEvent = { _, _ -> null },
-            reduce = { event ->
-                when (event) {
-                    is SimpleEvent.StateUpdated -> event.newState
-                }
-            },
-            metadata = metadata,
-            content = { state, _ ->
-                content(state) { newState ->
-                    // This would need access to the action handler
-                    // In practice, you'd use LocalStateViewModel.current
-                }
-            }
-        )
-    }
-    
-    /**
-     * Build the entry provider
-     */
-    public fun build(): (Any) -> NavEntry<Any> = entryProvider.build()
-    
-    // Internal classes for simple state management
-    private sealed class SimpleAction<S : State> : Action {
-        data class UpdateState<S : State>(val newState: S) : SimpleAction<S>()
-    }
-    
-    private sealed class SimpleEvent<S : State> : Event {
-        data class StateUpdated<S : State>(val newState: S) : SimpleEvent<S>()
-    }
-}
 
 /**
- * DSL function to create a navigation graph with androidx.navigation3
+ * Helper function to create a screen factory from a simple state screen
  */
-public inline fun navigation3Graph(
-    builder: Navigation3GraphBuilder.() -> Unit
-): (Any) -> NavEntry<Any> {
-    val graphBuilder = Navigation3GraphBuilder()
-    graphBuilder.apply(builder)
-    return graphBuilder.build()
-}
-
-/**
- * Extension functions for EntryProviderBuilder to add state screens
- */
-public fun <S : State, A : Action, V : Event, F : Effect> EntryProviderBuilder<*>.stateScreen(
-    screenId: ScreenId,
-    initialState: S,
-    processAction: suspend CoroutineScope.(A, S) -> V,
-    handleEvent: (V, S) -> F?,
-    reduce: S.(V) -> S,
-    onEffect: suspend (F) -> Unit = {},
-    metadata: Map<String, Any> = emptyMap(),
-    content: @Composable (S, (A) -> Unit) -> Unit
-) {
-    val viewModel = stateViewModel(
-        initialState = initialState,
-        processAction = processAction,
-        handleEvent = handleEvent,
-        reduce = reduce
-    )
-    
-    addEntryProvider(
-        key = screenId,
-        contentKey = screenId.id,
-        metadata = metadata
-    ) { _ ->
-        StateContent(
-            viewModel = viewModel,
-            onEffect = onEffect,
-            content = content
-        )
+public fun <S : State> SimpleStateScreenDestination<S>.toFactory() =
+    { storeInBackStack: Boolean, params: ScatterMap<String, String>?, extra: Extra? ->
+        // Create a copy with the provided parameters
+        this
     }
-}

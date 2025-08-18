@@ -227,10 +227,10 @@ kotlin {
 
 android {
     namespace = "com.usmonie.compass.core"
-    compileSdk = 36
+    compileSdk = 35
 
     defaultConfig {
-        minSdk = 23
+        minSdk = 21
     }
 
     compileOptions {

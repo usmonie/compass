@@ -16,6 +16,8 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -32,23 +34,28 @@ public actual fun PredictiveBackHandler(
     val currentOnBack by rememberUpdatedState(onBack)
     val currentOnBackPressed by rememberUpdatedState(onBackPressed)
     val scope = rememberCoroutineScope()
+    val density = LocalDensity.current
+    val windowInfo = LocalWindowInfo.current
 
-    val screenWidth = remember { 1920f } // Default desktop screen width
+    val screenWidth = remember(windowInfo.containerSize.width) {
+        with(density) { windowInfo.containerSize.width.toDp().value }
+    }
 
-    // Handle keyboard events for desktop
-    val keyboardModifier = if (enabled) {
+    val modifier = if (enabled) {
         Modifier
             .focusProperties { canFocus = true }
             .onKeyEvent { keyEvent ->
                 when {
                     keyEvent.type == KeyEventType.KeyDown &&
                             (keyEvent.key == Key.Escape || keyEvent.key == Key.Backspace) -> {
+                        // Create a simple back processor for keyboard events
                         val backProcessor = BackProcessor(
                             scope = scope,
                             isPredictive = false,
                             onBack = currentOnBack
                         )
 
+                        // Send immediate back gesture for keyboard
                         backProcessor.send(
                             NavigationGesture.Start(
                                 positionX = screenWidth / 2f,
@@ -71,5 +78,5 @@ public actual fun PredictiveBackHandler(
         Modifier
     }
 
-    Box(modifier = keyboardModifier, content = content)
+    Box(modifier = modifier, content = content)
 }
