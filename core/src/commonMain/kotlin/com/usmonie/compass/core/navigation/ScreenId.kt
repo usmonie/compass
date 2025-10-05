@@ -1,7 +1,6 @@
 package com.usmonie.compass.core.navigation
 
+import androidx.navigation3.runtime.NavKey
 import com.usmonie.compass.core.Extra
-import kotlin.jvm.JvmInline
 
-@JvmInline
-public value class ScreenId(public val id: String): Extra
+public open class ScreenId(public val id: String): Extra, NavKey

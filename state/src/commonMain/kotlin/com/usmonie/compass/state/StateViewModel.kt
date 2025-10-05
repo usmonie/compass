@@ -10,7 +10,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
@@ -73,15 +72,14 @@ public abstract class StateViewModel<S : State, in A : Action, V : Event, out F 
     private val viewModelJob = SupervisorJob()
     protected val viewModelScope: CoroutineScope = CoroutineScope(viewModelJob + defaultDispatcher)
 
-    private val _state = MutableStateFlow(initialState)
-
     /**
      * The current state as a StateFlow. UI components should observe this to react to state changes.
      *
      * This StateFlow emits new states whenever events are processed and reduce() is called.
      * It guarantees that observers always receive the most current state.
      */
-    public val state: StateFlow<S> = _state.asStateFlow()
+    public val state: StateFlow<S>
+        field = MutableStateFlow(initialState)
 
     private val _effect = Channel<F>()
     /**
@@ -117,7 +115,7 @@ public abstract class StateViewModel<S : State, in A : Action, V : Event, out F 
                 val event = processAction(action)
                 handleState(event)
             } catch (e: Exception) {
-                onReduceError(e)
+                mapErrorToEvent(e)?.let { handleState(it) }
             }
         }
     }
@@ -129,7 +127,7 @@ public abstract class StateViewModel<S : State, in A : Action, V : Event, out F 
      */
     protected suspend fun handleState(event: V) {
         val newState = state.value.reduce(event)
-        _state.emit(newState)
+        state.emit(newState)
         handleEvent(event)?.let { _effect.send(it) }
     }
 
@@ -142,10 +140,10 @@ public abstract class StateViewModel<S : State, in A : Action, V : Event, out F 
      * @param exception The exception that occurred during processing
      */
     protected open fun onReduceError(exception: Exception) {
-        // Default implementation prints stack trace
-        // Override to provide custom error handling
         exception.printStackTrace()
     }
+
+    protected open fun mapErrorToEvent(throwable: Throwable): V? = null
 
     /**
      * Reduces the current state to a new state based on the given event.
@@ -182,7 +180,7 @@ public abstract class StateViewModel<S : State, in A : Action, V : Event, out F 
      * @param event The event to handle
      * @return The side effect to emit, or null if no side effect is needed
      */
-    protected abstract suspend fun handleEvent(event: V): F?
+    protected abstract fun handleEvent(event: V): F?
 
     /**
      * Clears the resources of the ViewModel, particularly cancelling any ongoing coroutine work.

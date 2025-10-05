@@ -91,6 +91,7 @@ publishing {
 }
 
 kotlin {
+    explicitApi()
     jvmToolchain(23)
     androidTarget {
         publishLibraryVariants("release")
@@ -168,6 +169,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(libs.androidx.collections)
+            api(libs.androidx.navigation3.compose)
             api(libs.coroutines.core)
         }
 
@@ -180,10 +182,10 @@ kotlin {
 
 android {
     namespace = "com.usmonie.compass.state"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 23
     }
 
     compileOptions {

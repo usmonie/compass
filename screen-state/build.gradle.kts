@@ -119,6 +119,7 @@ publishing {
 }
 
 kotlin {
+    explicitApi()
     jvmToolchain(23) // Changed from 17 to 23 to match installed Java version
     androidTarget {
         publishLibraryVariants("release")
@@ -198,7 +199,10 @@ kotlin {
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.ui)
+            implementation(compose.material3)
             implementation(libs.androidx.collections)
+            implementation(libs.kotlinx.serialization.json)
+            api(libs.androidx.navigation3.compose)
             api(libs.ui.backhandler)
             // Зависимости на другие compass модули
             api(projects.compass.core)
@@ -227,10 +231,10 @@ kotlin {
 
 android {
     namespace = "com.usmonie.compass.core"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 23
     }
 
     compileOptions {

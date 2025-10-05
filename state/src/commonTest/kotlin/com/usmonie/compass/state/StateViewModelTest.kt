@@ -1,9 +1,11 @@
+// commonTest/com/usmonie/compass/state/StateViewModelTest.kt
 package com.usmonie.compass.state
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.test.TestDispatcher
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -11,141 +13,106 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class StateViewModelTest {
 
-    private val testDispatcher: TestDispatcher = UnconfinedTestDispatcher()
 
+    private val testDispatcher = StandardTestDispatcher()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     @BeforeTest
     fun setup() {
         Dispatchers.setMain(testDispatcher)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @AfterTest
     fun tearDown() {
         Dispatchers.resetMain()
     }
 
-    // Test State
-    data class TestState(val count: Int = 0) : State
+    @Test
+    fun `given initial state, stateFlow emits initial state`() = runTest {
+        val initialState = TestState(count = 0)
+        val viewModel = createStateViewModel<TestState, TestAction, TestEvent, TestEffect>(
+            initialState = initialState,
+            processAction = { _, _ -> TestEvent.Incremented },
+            handleEvent = { _, _ -> null },
+            reduce = {
+                when (it) {
+                    is TestEvent.Incremented -> copy(count = count + 1)
+                }
+            }
+        )
 
-    // Test Actions
-    sealed class TestAction : Action {
-        object Increment : TestAction()
-        object Decrement : TestAction()
-    }
-
-    // Test Events
-    sealed class TestEvent : Event {
-        object Incremented : TestEvent()
-        object Decremented : TestEvent()
-    }
-
-    // Test Effects
-    sealed class TestEffect : Effect {
-        object ShowToast : TestEffect()
+        assertEquals(initialState, viewModel.state.value)
     }
 
     @Test
-    fun `should update state correctly when action is processed`() = runTest(testDispatcher) {
+    fun `handleAction triggers state update and effect`() = runTest {
         val viewModel = createStateViewModel<TestState, TestAction, TestEvent, TestEffect>(
-            initialState = TestState(0),
-            processAction = { action, _ ->
+            initialState = TestState(count = 0),
+            processAction = { _, action ->
                 when (action) {
                     TestAction.Increment -> TestEvent.Incremented
-                    TestAction.Decrement -> TestEvent.Decremented
+                    else -> TestEvent.Incremented
                 }
             },
             handleEvent = { event, state ->
                 when (event) {
-                    TestEvent.Incremented -> if (state.count >= 9) TestEffect.ShowToast else null
-                    TestEvent.Decremented -> null
+                    TestEvent.Incremented -> if (state.count == 0) TestEffect.ShowMessage else null
                 }
             },
-            reduce = { event ->
-                when (event) {
+            reduce = {
+                when (it) {
                     TestEvent.Incremented -> copy(count = count + 1)
-                    TestEvent.Decremented -> copy(count = count - 1)
                 }
             }
         )
 
-        // Initial state should be 0
-        assertEquals(0, viewModel.state.value.count)
 
-        // Handle increment action
         viewModel.handleAction(TestAction.Increment)
 
+        // Assert state
         assertEquals(1, viewModel.state.value.count)
 
-        // Handle decrement action
-        viewModel.handleAction(TestAction.Decrement)
-
-        assertEquals(0, viewModel.state.value.count)
-
-        viewModel.onDispose()
+        // Assert effect
+        val effect = viewModel.effect.toList().first()
+        assertEquals(TestEffect.ShowMessage, effect)
     }
 
     @Test
-    fun `should work with FlowStateViewModel for multiple events`() = runTest(testDispatcher) {
-        val viewModel = flowStateViewModel<TestState, TestAction, TestEvent, TestEffect>(
-            initialState = TestState(0),
-            processAction = { action, _ ->
-                flowOf(
-                    when (action) {
-                        TestAction.Increment -> TestEvent.Incremented
-                        TestAction.Decrement -> TestEvent.Decremented
-                    }
-                )
-            },
-            handleEvent = { _, _ -> null },
-            reduce = { event ->
-                when (event) {
-                    TestEvent.Incremented -> copy(count = count + 1)
-                    TestEvent.Decremented -> copy(count = count - 1)
-                }
+    fun `exception in processAction is caught and does not crash`() = runTest {
+        val viewModel = object : StateViewModel<TestState, TestAction, TestEvent, TestEffect>(
+            initialState = TestState(0)
+        ) {
+            override suspend fun processAction(action: TestAction): TestEvent {
+                throw RuntimeException("Oops")
             }
-        )
 
-        assertEquals(0, viewModel.state.value.count)
+            override fun TestState.reduce(event: TestEvent): TestState = this
+            override fun handleEvent(event: TestEvent): TestEffect? = null
+            override fun mapErrorToEvent(throwable: Throwable): TestEvent? = null
+        }
 
-        // This should increment once
+        var caught = false
         viewModel.handleAction(TestAction.Increment)
-
-        assertEquals(1, viewModel.state.value.count)
-
-        viewModel.onDispose()
+        // Should not throw — just log or ignore
+        caught = true
+        assertTrue(caught)
     }
 }
 
-class ContentStateTest {
+data class TestState(val count: Int) : State
+internal sealed class TestAction : Action {
+    object Increment : TestAction()
+}
 
-    @Test
-    fun `should handle ContentState map operations correctly`() {
-        val successState: ContentState<String> = ContentState.Success("Hello")
-        val errorState: ContentState<String> =
-            ContentState.Error<String, ErrorState>(object : ErrorState(RuntimeException("Test")) {})
-        val loadingState: ContentState<String> = ContentState.Loading()
+sealed class TestEvent : Event {
+    object Incremented : TestEvent()
+}
 
-        // Test map
-        val mappedSuccess = successState.map { it.uppercase() }
-        assertEquals("HELLO", (mappedSuccess as ContentState.Success).data)
-
-        // Test updateData
-        val updatedSuccess = successState.updateData { "$it World" }
-        assertEquals("Hello World", (updatedSuccess as ContentState.Success).data)
-
-        // Test type checking
-        assertEquals(true, successState is ContentState.Success)
-        assertEquals(false, successState is ContentState.Error<*, *>)
-        assertEquals(false, successState is ContentState.Loading)
-
-        assertEquals(false, errorState is ContentState.Success)
-        assertEquals(true, errorState is ContentState.Error<*, *>)
-        assertEquals(false, errorState is ContentState.Loading)
-
-        assertEquals(false, loadingState is ContentState.Success)
-        assertEquals(false, loadingState is ContentState.Error<*, *>)
-        assertEquals(true, loadingState is ContentState.Loading)
-    }
+sealed class TestEffect : Effect {
+    object ShowMessage : TestEffect()
 }

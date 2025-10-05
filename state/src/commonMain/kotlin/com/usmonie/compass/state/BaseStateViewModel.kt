@@ -15,7 +15,7 @@ public open class BaseStateViewModel<S : State, in A : Action, V : Event, out F 
     override suspend fun processAction(action: A): V =
         actionProcessor.process(viewModelScope, action, state.value)
 
-    override suspend fun handleEvent(event: V): F? = eventHandler.handle(event, state.value)
+    override fun handleEvent(event: V): F? = eventHandler.handle(event, state.value)
 
     override fun S.reduce(event: V): S = stateManager.reduce(this, event)
 }

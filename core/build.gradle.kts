@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.kotlin.serialization)
     id("maven-publish")
     // id("signing") // Removed temporarily to fix linter errors, will configure signing later
 }
@@ -119,6 +120,7 @@ publishing {
 }
 
 kotlin {
+    explicitApi()
     jvmToolchain(23) // Changed from 17 to 23 to match installed Java version
     androidTarget {
         publishLibraryVariants("release")
@@ -200,6 +202,8 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.ui)
             implementation(libs.androidx.collections)
+            implementation(libs.kotlinx.serialization.core)
+            api(libs.androidx.navigation3.compose)
             api(libs.ui.backhandler)
         }
 
@@ -240,10 +244,10 @@ kotlin {
 
 android {
     namespace = "com.usmonie.compass.core"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 23
     }
 
     compileOptions {

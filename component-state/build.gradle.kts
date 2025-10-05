@@ -93,6 +93,7 @@ publishing {
 }
 
 kotlin {
+    explicitApi()
     jvmToolchain(23)
     androidTarget {
         publishLibraryVariants("release")
@@ -196,10 +197,10 @@ kotlin {
 
 android {
     namespace = "com.usmonie.compass.state"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 23
     }
 
     compileOptions {
