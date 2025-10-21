@@ -1,16 +1,18 @@
 package com.usmonie.compass.screen.state
 
 import androidx.collection.ScatterMap
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.navigation3.runtime.EntryProviderBuilder
 import androidx.navigation3.runtime.NavKey
 import com.usmonie.compass.core.Extra
 import com.usmonie.compass.core.navigation.ScreenDestination
 import com.usmonie.compass.core.navigation.ScreenId
 import com.usmonie.compass.state.Action
+import com.usmonie.compass.state.ActionProcessor
 import com.usmonie.compass.state.Effect
 import com.usmonie.compass.state.Event
+import com.usmonie.compass.state.EventHandler
 import com.usmonie.compass.state.State
+import com.usmonie.compass.state.StateManager
 
 /**
  * DSL function to create a state-managed screen
@@ -21,6 +23,37 @@ public inline fun <K : ScreenId, S : State, A : Action, V : Event, F : Effect> s
     builder: StateScreenBuilder<K, S, A, V, F>.() -> Unit,
 ): StateScreenDestination<K, S, A, V, F> {
     val screenBuilder = StateScreenBuilder<K, S, A, V, F>()
+    screenBuilder.apply(builder)
+    return screenBuilder.build(id, storeInBackStack)
+}
+
+/**
+ * DSL function to create a state-managed screen
+ */
+public inline fun <K : ScreenId, S : State, A : Action, V : Event, F : Effect> stateScreen(
+    id: K,
+    storeInBackStack: Boolean = true,
+    actionProcessor: ActionProcessor<A, S, V>? = null,
+    eventHandler: EventHandler<V, S, F>? = null,
+    stateManager: StateManager<S, V>? = null,
+    builder: StateScreenBuilder<K, S, A, V, F>.() -> Unit,
+): StateScreenDestination<K, S, A, V, F> {
+    val screenBuilder = StateScreenBuilder<K, S, A, V, F>()
+    if (actionProcessor != null) {
+        screenBuilder.processAction { action, state ->
+            actionProcessor.process(this, action, state)
+        }
+    }
+    if (eventHandler != null) {
+        screenBuilder.handleEvent { event, state ->
+            eventHandler.handle(event, state)
+        }
+    }
+    if (stateManager != null) {
+        screenBuilder.reduce { event ->
+            stateManager.reduce(this, event)
+        }
+    }
     screenBuilder.apply(builder)
     return screenBuilder.build(id, storeInBackStack)
 }
@@ -63,7 +96,7 @@ public fun <K : ScreenId, S : State> StateScreenDestination<K, S, SimpleAction<S
         this
     }
 
-public fun <K : ScreenId, S : State, A : Action, V : Event, F : Effect> EntryProviderBuilder<NavKey>.entry(
+public fun <K : ScreenId, S : State, A : Action, V : Event, F : Effect> EntryProviderBuilder<NavKey>.stateEntry(
     key: K,
     screenDestination: (K) -> StateScreenDestination<K, S, A, V, F>,
     metadata: Map<String, Any> = emptyMap(),
@@ -77,7 +110,21 @@ public fun <K : ScreenId, S : State, A : Action, V : Event, F : Effect> EntryPro
     }
 }
 
-public inline fun <reified K : ScreenId, S : State, A : Action, V : Event, F : Effect> EntryProviderBuilder<NavKey>.entry(
+public fun <K : ScreenId> EntryProviderBuilder<NavKey>.entry(
+    key: K,
+    screenDestination: (K) -> ScreenDestination<K>,
+    metadata: Map<String, Any> = emptyMap(),
+) {
+    entry(
+        key = key,
+        metadata = metadata,
+    ) {
+        val screenDestination = screenDestination(it)
+        screenDestination.Content()
+    }
+}
+
+public inline fun <reified K : ScreenId, S : State, A : Action, V : Event, F : Effect> EntryProviderBuilder<NavKey>.stateEntry(
     crossinline screenDestination: (K) -> StateScreenDestination<K, S, A, V, F>,
     metadata: Map<String, Any> = emptyMap(),
 ) {
@@ -89,7 +136,7 @@ public inline fun <reified K : ScreenId, S : State, A : Action, V : Event, F : E
     }
 }
 
-public inline fun <reified K : ScreenId, S : State,> EntryProviderBuilder<NavKey>.simpleEntry(
+public inline fun <reified K : ScreenId, S : State> EntryProviderBuilder<NavKey>.simpleEntry(
     crossinline screenDestination: (K) -> StateScreenDestination<K, S, SimpleAction<S>, SimpleEvent<S>, SimpleEffect>,
     metadata: Map<String, Any> = emptyMap(),
 ) {

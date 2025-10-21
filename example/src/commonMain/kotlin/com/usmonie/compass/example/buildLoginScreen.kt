@@ -12,6 +12,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -33,7 +34,7 @@ internal fun buildLoginScreen(onLoginSuccess: (User) -> Unit): StateScreenDestin
                     if (state.email.isEmpty() || state.password.isEmpty()) {
                         LoginEvent.LoginFailed(IllegalArgumentException("Fill all fields"))
                     } else {
-                        LoginEvent.LoginSuccess(User(""," Usman"))
+                        LoginEvent.LoginSuccess(User("", " Usman"))
                     }
                 }
             }
@@ -58,27 +59,30 @@ internal fun buildLoginScreen(onLoginSuccess: (User) -> Unit): StateScreenDestin
             }
         }
         content { state, sendAction ->
-            Column(modifier = Modifier.padding(16.dp)) {
-                OutlinedTextField(
-                    value = state.email,
-                    onValueChange = { sendAction(LoginAction.EnterEmail(it)) },
-                    label = { Text("Email") }
-                )
-                OutlinedTextField(
-                    value = state.password,
-                    onValueChange = { sendAction(LoginAction.EnterPassword(it)) },
-                    label = { Text("Password") },
-                    visualTransformation = PasswordVisualTransformation()
-                )
-                if (state.error != null) {
-                    Text(text = state.error, color = MaterialTheme.colorScheme.error)
-                }
-                Button(
-                    onClick = { sendAction(LoginAction.Submit) },
-                    enabled = !state.isLoading
-                ) {
-                    if (state.isLoading) CircularProgressIndicator(Modifier.size(16.dp))
-                    else Text("Login")
+            Scaffold {
+
+                Column(modifier = Modifier.padding(16.dp)) {
+                    OutlinedTextField(
+                        value = state.email,
+                        onValueChange = { sendAction(LoginAction.EnterEmail(it)) },
+                        label = { Text("Email") }
+                    )
+                    OutlinedTextField(
+                        value = state.password,
+                        onValueChange = { sendAction(LoginAction.EnterPassword(it)) },
+                        label = { Text("Password") },
+                        visualTransformation = PasswordVisualTransformation()
+                    )
+                    if (state.error != null) {
+                        Text(text = state.error, color = MaterialTheme.colorScheme.error)
+                    }
+                    Button(
+                        onClick = { sendAction(LoginAction.Submit) },
+                        enabled = !state.isLoading
+                    ) {
+                        if (state.isLoading) CircularProgressIndicator(Modifier.size(16.dp))
+                        else Text("Login")
+                    }
                 }
             }
         }

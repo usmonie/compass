@@ -1,6 +1,5 @@
 package com.usmonie.compass.screen.state
 
-import androidx.compose.foundation.text.input.TextFieldState.Saver.restore
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.saveable.Saver

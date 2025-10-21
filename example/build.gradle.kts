@@ -78,7 +78,6 @@ kotlin {
 
     sourceSets.all {
         languageSettings.enableLanguageFeature("ExplicitBackingFields")
-        // languageSettings.enableLanguageFeature("-Xskip-prerelease-check") // Удаляем неподдерживаемую опцию
     }
 
     sourceSets {
@@ -87,13 +86,15 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.ui)
             implementation(compose.material3)
-            api(libs.androidx.collections)
-            api(libs.coroutines.core)
-            api(libs.androidx.navigation3.compose)
             implementation(projects.compass.core)
             implementation(projects.compass.state)
             implementation(projects.compass.componentState)
             implementation(projects.compass.screenState)
+            api(libs.androidx.navigation3.compose)
+        }
+
+        androidMain.dependencies {
+            implementation(libs.androidx.activity.compose)
         }
 
         commonTest.dependencies {
@@ -112,7 +113,31 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_23
+        targetCompatibility = JavaVersion.VERSION_23
     }
+}
+
+dependencies {
+  implementation("androidx.activity:activity-compose:1.12.0-alpha09")
+  implementation("androidx.activity:activity:1.12.0-alpha09")
+  implementation("androidx.compose.animation:animation-core:1.10.0-alpha04")
+  implementation("androidx.compose.animation:animation:1.10.0-alpha04")
+  implementation("androidx.compose.foundation:foundation-layout:1.10.0-alpha04")
+  implementation("androidx.compose.foundation:foundation:1.10.0-alpha04")
+  implementation("androidx.compose.material3:material3:1.5.0-alpha04")
+  implementation("androidx.compose.runtime:runtime-saveable:1.10.0-alpha04")
+  implementation("androidx.compose.runtime:runtime:1.10.0-alpha04")
+  implementation("androidx.compose.ui:ui-graphics:1.10.0-alpha04")
+  implementation("androidx.compose.ui:ui-text:1.10.0-alpha04")
+  implementation("androidx.compose.ui:ui-unit:1.10.0-alpha04")
+  implementation("androidx.compose.ui:ui:1.10.0-alpha04")
+  implementation("androidx.navigation3:navigation3-runtime:1.0.0-alpha10")
+  implementation("androidx.navigation3:navigation3-ui:1.0.0-alpha10")
+  implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.20")
+  implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+  implementation(project(":compass:component-state"))
+  implementation(project(":compass:core"))
+  implementation(project(":compass:screen-state"))
+  implementation(project(":compass:state"))
 }

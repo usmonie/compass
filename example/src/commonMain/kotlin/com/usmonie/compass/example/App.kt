@@ -4,16 +4,19 @@ import User
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.scene.rememberSceneSetupNavEntryDecorator
@@ -25,9 +28,9 @@ import com.usmonie.compass.screen.state.SimpleAction
 import com.usmonie.compass.screen.state.SimpleEffect
 import com.usmonie.compass.screen.state.SimpleEvent
 import com.usmonie.compass.screen.state.StateScreenDestination
-import com.usmonie.compass.screen.state.entry
 import com.usmonie.compass.screen.state.simpleEntry
 import com.usmonie.compass.screen.state.simpleStateScreen
+import com.usmonie.compass.screen.state.stateEntry
 import com.usmonie.compass.state.ContentState
 
 @Composable
@@ -35,7 +38,7 @@ internal fun App() {
     var backStack: List<ScreenId> by remember { mutableStateOf(listOf(LoginScreen)) }
 
     val entryProvider = entryProvider {
-        entry(
+        stateEntry(
             LoginScreen,
             {
                 buildLoginScreen {
@@ -43,6 +46,7 @@ internal fun App() {
                 }
             }
         )
+
         simpleEntry<ProfileScreen, ProfileScreenState>(
             screenDestination = {
                 buildProfileScreen(it.user)
@@ -55,6 +59,12 @@ internal fun App() {
             backStack = backStack,
             transitionSpec = { // Define custom transitions for screen changes
                 fadeIn(tween(300)) togetherWith fadeOut(tween(300))
+            },
+            popTransitionSpec = {
+                fadeIn(tween(300)) togetherWith scaleOut(
+                    targetScale = 0.9f,
+                    transformOrigin = TransformOrigin(pivotFractionX = 0.5f, pivotFractionY = 0.5f)
+                )
             },
             entryDecorators = listOf(
                 // Add the default decorators for managing scenes and saving state
@@ -82,9 +92,11 @@ private fun buildProfileScreen(user: User): StateScreenDestination<ProfileScreen
             state.user
                 .onLoading { CircularProgressIndicator() }
                 .onSuccess { user ->
-                    Column {
-                        Text("Welcome, ${user.name}!")
-                        UserCardComponent.Component()
+                    Scaffold {
+                        Column {
+                            Text("Welcome, ${user.name}!")
+                            UserCardComponent.Component()
+                        }
                     }
                 }
         }

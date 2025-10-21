@@ -204,7 +204,14 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_23
+        targetCompatibility = JavaVersion.VERSION_23
     }
+}
+
+dependencies {
+  api("androidx.compose.runtime:runtime:1.10.0-alpha04")
+  api("org.jetbrains.kotlin:kotlin-stdlib:2.2.20")
+  api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+  api(project(":compass:state"))
 }

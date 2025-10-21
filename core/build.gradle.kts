@@ -251,8 +251,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_23
+        targetCompatibility = JavaVersion.VERSION_23
     }
 }
 
@@ -291,3 +291,9 @@ compose.desktop {
 // tasks.withType<Sign>().configureEach {
 //     onlyIf { !gradle.taskGraph.hasTask(":publishToMavenLocal") }
 // }
+
+dependencies {
+  api("androidx.compose.runtime:runtime:1.10.0-alpha04")
+  api("androidx.navigation3:navigation3-runtime:1.0.0-alpha10")
+  api("org.jetbrains.kotlin:kotlin-stdlib:2.2.20")
+}
