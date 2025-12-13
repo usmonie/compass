@@ -1,7 +1,7 @@
 package com.usmonie.compass.screen.state
 
 import androidx.collection.ScatterMap
-import androidx.navigation3.runtime.EntryProviderBuilder
+import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import com.usmonie.compass.core.Extra
 import com.usmonie.compass.core.navigation.ScreenDestination
@@ -96,7 +96,7 @@ public fun <K : ScreenId, S : State> StateScreenDestination<K, S, SimpleAction<S
         this
     }
 
-public fun <K : ScreenId, S : State, A : Action, V : Event, F : Effect> EntryProviderBuilder<NavKey>.stateEntry(
+public fun <K : ScreenId, S : State, A : Action, V : Event, F : Effect> EntryProviderScope<NavKey>.stateEntry(
     key: K,
     screenDestination: (K) -> StateScreenDestination<K, S, A, V, F>,
     metadata: Map<String, Any> = emptyMap(),
@@ -110,7 +110,7 @@ public fun <K : ScreenId, S : State, A : Action, V : Event, F : Effect> EntryPro
     }
 }
 
-public fun <K : ScreenId> EntryProviderBuilder<NavKey>.entry(
+public fun <K : ScreenId> EntryProviderScope<NavKey>.entry(
     key: K,
     screenDestination: (K) -> ScreenDestination<K>,
     metadata: Map<String, Any> = emptyMap(),
@@ -124,7 +124,7 @@ public fun <K : ScreenId> EntryProviderBuilder<NavKey>.entry(
     }
 }
 
-public inline fun <reified K : ScreenId, S : State, A : Action, V : Event, F : Effect> EntryProviderBuilder<NavKey>.stateEntry(
+public inline fun <reified K : ScreenId, S : State, A : Action, V : Event, F : Effect> EntryProviderScope<NavKey>.stateEntry(
     crossinline screenDestination: (K) -> StateScreenDestination<K, S, A, V, F>,
     metadata: Map<String, Any> = emptyMap(),
 ) {
@@ -136,7 +136,7 @@ public inline fun <reified K : ScreenId, S : State, A : Action, V : Event, F : E
     }
 }
 
-public inline fun <reified K : ScreenId, S : State> EntryProviderBuilder<NavKey>.simpleEntry(
+public inline fun <reified K : ScreenId, S : State> EntryProviderScope<NavKey>.simpleEntry(
     crossinline screenDestination: (K) -> StateScreenDestination<K, S, SimpleAction<S>, SimpleEvent<S>, SimpleEffect>,
     metadata: Map<String, Any> = emptyMap(),
 ) {

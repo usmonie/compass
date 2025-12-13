@@ -168,9 +168,9 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.ui)
+            implementation("org.jetbrains.compose.runtime:runtime:1.10.0-beta01")
+            implementation("org.jetbrains.compose.foundation:foundation:1.10.0-beta01")
+            implementation("org.jetbrains.compose.ui:ui:1.10.0-beta01")
             api(projects.compass.core)
             api(projects.compass.state)
         }

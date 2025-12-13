@@ -196,10 +196,10 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.ui)
-            implementation(compose.material3)
+            implementation("org.jetbrains.compose.runtime:runtime:1.10.0-beta01")
+            implementation("org.jetbrains.compose.foundation:foundation:1.10.0-beta01")
+            implementation("org.jetbrains.compose.ui:ui:1.10.0-beta01")
+            implementation("org.jetbrains.compose.material3:material3:1.9.0")
             implementation(libs.androidx.collections)
             implementation(libs.kotlinx.serialization.json)
             api(libs.androidx.navigation3.compose)
