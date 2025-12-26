@@ -1,4 +1,4 @@
-package com.usmonie.compass.core.navigation
+package com.usmonie.compass.screen.state.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable

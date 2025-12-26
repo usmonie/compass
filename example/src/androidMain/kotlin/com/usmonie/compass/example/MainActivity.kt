@@ -10,7 +10,7 @@ public class MainActivity : ComponentActivity() {
 
         setContent {
 
-            App()
+            ExampleApp()
         }
     }
 }

@@ -1,17 +1,9 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
-
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.composeMultiplatform)
-    alias(libs.plugins.androidLibrary)
+    id("compose")
+
     id("maven-publish")
     // id("signing") // Removed temporarily to fix linter errors, will configure signing later
 }
-
-// Version and group are now set by compass-versions.gradle.kts
 
 publishing {
     publications {
@@ -119,149 +111,17 @@ publishing {
 }
 
 kotlin {
-    explicitApi()
-    jvmToolchain(23) // Changed from 17 to 23 to match installed Java version
-    androidTarget {
-        publishLibraryVariants("release")
-        //https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-test.html
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test)
-    }
-    explicitApi()
-
-    // iOS targets
-    listOf(
-        iosX64(),
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach {
-        it.binaries.framework {
-            baseName = "CompassScreenState"
-            isStatic = true
-        }
-    }
-
-    // Desktop JVM target
-    jvm()
-
-    // Linux Native targets
-    // linuxX64()
-    // linuxArm64()
-
-    // macOS Native targets
-    // macosX64()
-    // macosArm64()
-
-    // Windows Native targets
-    // mingwX64()
-
-    // Web targets
-    js(IR) {
-        browser()
-        nodejs()
-
-        browser {
-            testTask {
-                enabled = false
-            }
-        }
-
-        nodejs {
-            testTask {
-                useMocha {
-                    timeout = "10s"
-                }
-            }
-        }
-    }
-
-    // WASM target (экспериментальный)
-    if (project.findProperty("compass.enable.wasm") == "true") {
-        @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-        wasmJs {
-            browser()
-
-            browser {
-                testTask {
-                    enabled = false
-                }
-            }
-        }
-    }
-
-    sourceSets.all {
-        languageSettings.enableLanguageFeature("ExplicitBackingFields")
-        // languageSettings.enableLanguageFeature("-Xskip-prerelease-check") // Удаляем неподдерживаемую опцию
-    }
+    setupCompassAndroidLibrary()
 
     sourceSets {
         commonMain.dependencies {
-            implementation("org.jetbrains.compose.runtime:runtime:1.10.0-beta01")
-            implementation("org.jetbrains.compose.foundation:foundation:1.10.0-beta01")
-            implementation("org.jetbrains.compose.ui:ui:1.10.0-beta01")
-            implementation("org.jetbrains.compose.material3:material3:1.9.0")
             implementation(libs.androidx.collections)
             implementation(libs.kotlinx.serialization.json)
-            api(libs.androidx.navigation3.compose)
-            api(libs.ui.backhandler)
-            // Зависимости на другие compass модули
-            api(projects.compass.core)
-            api(projects.compass.componentState)
-        }
+            implementation(libs.androidx.navigation3.compose)
+            implementation(libs.ui.backhandler)
 
-        commonTest.dependencies {
-            implementation(kotlin("test"))
-            implementation(libs.kotlinx.coroutines.test)
-        }
-
-        androidMain.dependencies {
-            implementation(compose.uiTooling)
-            implementation(libs.androidx.activity.compose)
-        }
-
-        jvmMain.dependencies {
-            implementation(compose.desktop.common)
-        }
-
-        jsMain.dependencies {
-            implementation(compose.html.core)
-        }
-    }
-}
-
-android {
-    namespace = "com.usmonie.compass.core"
-    compileSdk = 36
-
-    defaultConfig {
-        minSdk = 23
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_23
-        targetCompatibility = JavaVersion.VERSION_23
-    }
-}
-
-compose.desktop {
-    application {
-        mainClass = "MainKt"
-
-        nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "Compass Core"
-            packageVersion = "1.0.0"
-
-            linux {
-                iconFile.set(project.file("desktopAppIcons/LinuxIcon.png"))
-            }
-            windows {
-                iconFile.set(project.file("desktopAppIcons/WindowsIcon.ico"))
-            }
-            macOS {
-                iconFile.set(project.file("desktopAppIcons/MacosIcon.icns"))
-                bundleID = "com.usmonie.compass.core.desktopApp"
-            }
+            implementation(projects.compass.componentState)
+            implementation(projects.compass.state)
         }
     }
 }
@@ -278,18 +138,3 @@ compose.desktop {
 // tasks.withType<Sign>().configureEach {
 //     onlyIf { !gradle.taskGraph.hasTask(":publishToMavenLocal") }
 // }
-
-dependencies {
-  implementation("androidx.compose.runtime:runtime-saveable:1.10.0-alpha04")
-  androidTestImplementation("androidx.compose.runtime:runtime:1.10.0-alpha04")
-  api("androidx.compose.runtime:runtime:1.10.0-alpha04")
-  api("androidx.navigation3:navigation3-runtime:1.0.0-alpha10")
-  androidTestImplementation("junit:junit:4.13.2")
-  api("org.jetbrains.kotlin:kotlin-stdlib:2.2.20")
-  androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-  api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-  api("org.jetbrains.kotlinx:kotlinx-serialization-core:1.9.0")
-  implementation(project(":compass:component-state"))
-  api(project(":compass:core"))
-  api(project(":compass:state"))
-}

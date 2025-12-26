@@ -1,11 +1,10 @@
 package com.usmonie.compass.screen.state
 
 import androidx.collection.ScatterMap
+import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.EntryProviderScope
-import androidx.navigation3.runtime.NavKey
-import com.usmonie.compass.core.Extra
-import com.usmonie.compass.core.navigation.ScreenDestination
-import com.usmonie.compass.core.navigation.ScreenId
+import com.usmonie.compass.screen.state.navigation.ScreenDestination
+import com.usmonie.compass.screen.state.navigation.ScreenId
 import com.usmonie.compass.state.Action
 import com.usmonie.compass.state.ActionProcessor
 import com.usmonie.compass.state.Effect
@@ -13,6 +12,7 @@ import com.usmonie.compass.state.Event
 import com.usmonie.compass.state.EventHandler
 import com.usmonie.compass.state.State
 import com.usmonie.compass.state.StateManager
+import kotlin.jvm.JvmSuppressWildcards
 
 /**
  * DSL function to create a state-managed screen
@@ -24,6 +24,29 @@ public inline fun <K : ScreenId, S : State, A : Action, V : Event, F : Effect> s
 ): StateScreenDestination<K, S, A, V, F> {
     val screenBuilder = StateScreenBuilder<K, S, A, V, F>()
     screenBuilder.apply(builder)
+    return screenBuilder.build(id, storeInBackStack)
+}
+
+/**
+ * DSL function to create a state-managed screen
+ */
+public fun <K : ScreenId, S : State, A : Action, V : Event, F : Effect> stateScreen(
+    id: K,
+    storeInBackStack: Boolean = true,
+    initialState: S,
+    processor: ActionProcessor<A, S, V>,
+    handler: EventHandler<V, S, F>,
+    manager: StateManager<S, V>,
+    screen: @Composable (S, (A) -> Unit) -> Unit,
+): StateScreenDestination<K, S, A, V, F> {
+    val screenBuilder = StateScreenBuilder<K, S, A, V, F>()
+    screenBuilder.apply {
+        initialState(initialState)
+        processAction(processor)
+        handleEvent(handler)
+        reduce(manager)
+        content { state, onAction -> screen(state, onAction) }
+    }
     return screenBuilder.build(id, storeInBackStack)
 }
 
@@ -96,7 +119,7 @@ public fun <K : ScreenId, S : State> StateScreenDestination<K, S, SimpleAction<S
         this
     }
 
-public fun <K : ScreenId, S : State, A : Action, V : Event, F : Effect> EntryProviderScope<NavKey>.stateEntry(
+public fun <K : ScreenId, S : State, A : Action, V : Event, F : Effect> EntryProviderScope<K>.stateEntry(
     key: K,
     screenDestination: (K) -> StateScreenDestination<K, S, A, V, F>,
     metadata: Map<String, Any> = emptyMap(),
@@ -110,7 +133,7 @@ public fun <K : ScreenId, S : State, A : Action, V : Event, F : Effect> EntryPro
     }
 }
 
-public fun <K : ScreenId> EntryProviderScope<NavKey>.entry(
+public fun <K : ScreenId> EntryProviderScope<K>.entry(
     key: K,
     screenDestination: (K) -> ScreenDestination<K>,
     metadata: Map<String, Any> = emptyMap(),
@@ -124,9 +147,9 @@ public fun <K : ScreenId> EntryProviderScope<NavKey>.entry(
     }
 }
 
-public inline fun <reified K : ScreenId, S : State, A : Action, V : Event, F : Effect> EntryProviderScope<NavKey>.stateEntry(
-    crossinline screenDestination: (K) -> StateScreenDestination<K, S, A, V, F>,
+public inline fun <reified K : ScreenId, S : State, A : Action, V : Event, F : Effect> EntryProviderScope<ScreenId>.stateEntry(
     metadata: Map<String, Any> = emptyMap(),
+    noinline screenDestination: (K) -> StateScreenDestination<K, S, A, V, F>,
 ) {
     entry<K>(
         metadata = metadata,
@@ -136,9 +159,23 @@ public inline fun <reified K : ScreenId, S : State, A : Action, V : Event, F : E
     }
 }
 
-public inline fun <reified K : ScreenId, S : State> EntryProviderScope<NavKey>.simpleEntry(
-    crossinline screenDestination: (K) -> StateScreenDestination<K, S, SimpleAction<S>, SimpleEvent<S>, SimpleEffect>,
+public inline fun <reified K : ScreenId> EntryProviderScope<ScreenId>.entry(
+    noinline contentKey: (key: @JvmSuppressWildcards K) -> Any = { it.toString() },
     metadata: Map<String, Any> = emptyMap(),
+    noinline screenDestination: (K) -> ScreenDestination<K>,
+) {
+    entry<K>(
+        clazzContentKey = contentKey,
+        metadata = metadata,
+    ) {
+        val screenDestination = screenDestination(it)
+        screenDestination.Content()
+    }
+}
+
+public inline fun <reified K : ScreenId, S : State> EntryProviderScope<ScreenId>.simpleEntry(
+    metadata: Map<String, Any> = emptyMap(),
+    noinline screenDestination: (K) -> StateScreenDestination<K, S, SimpleAction<S>, SimpleEvent<S>, SimpleEffect>,
 ) {
     entry<K>(
         metadata = metadata,

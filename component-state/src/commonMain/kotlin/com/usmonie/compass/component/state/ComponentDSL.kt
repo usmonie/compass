@@ -1,11 +1,10 @@
 package com.usmonie.compass.component.state
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import com.usmonie.compass.state.State
 import com.usmonie.compass.state.Action
 import com.usmonie.compass.state.Effect
 import com.usmonie.compass.state.Event
+import com.usmonie.compass.state.State
 import com.usmonie.compass.state.StateViewModel
 import com.usmonie.compass.state.createStateViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -20,7 +19,7 @@ public class StateComponentBuilder<S : State, A : Action, V : Event, F : Effect>
     private var handleEvent: ((V, S) -> F?)? = null
     private var reduce: (S.(V) -> S)? = null
     private var content: (@Composable (S, (A) -> Unit) -> Unit)? = null
-    private var onEffect: (suspend (F) -> Unit)? = null
+    private var onEffect: (@Composable (S, F?) -> Unit)? = null
     private var init: (StateViewModel<S, A, V, F>.() -> Unit)? = null
 
     public fun initialStateProvider(provider: () -> S) {
@@ -47,7 +46,7 @@ public class StateComponentBuilder<S : State, A : Action, V : Event, F : Effect>
         content = composable
     }
 
-    public fun onEffect(handler: suspend (F) -> Unit) {
+    public fun onEffect(handler: @Composable (S, F?) -> Unit) {
         onEffect = handler
     }
 
@@ -65,7 +64,7 @@ public class StateComponentBuilder<S : State, A : Action, V : Event, F : Effect>
                 init = init ?: {},
             ),
             content = requireNotNull(content) { "Content composable must be provided" },
-            onEffect = onEffect ?: {},
+            onEffect = onEffect ?: { _, _ -> },
         )
     }
 }
@@ -76,7 +75,7 @@ public class StateComponentBuilder<S : State, A : Action, V : Event, F : Effect>
 public class StateComponentDefinition<S : State, A : Action, V : Event, F : Effect>(
     private val viewModel: StateViewModel<S, A, V, F>,
     private val content: @Composable (S, (A) -> Unit) -> Unit,
-    private val onEffect: suspend (F) -> Unit,
+    private val onEffect: @Composable (S, F?) -> Unit,
 ) {
     /**
      * Creates a Composable component instance with lazy state initialization
@@ -96,7 +95,7 @@ public class StateComponentDefinition<S : State, A : Action, V : Event, F : Effe
     @Composable
     public fun Component(
         customInitialStateProvider: (() -> S)? = null,
-        customOnEffect: (suspend (F) -> Unit)? = null
+        customOnEffect: (@Composable (S, F?) -> Unit)? = null,
     ) {
         StateContent(
             viewModel = viewModel,
@@ -110,7 +109,7 @@ public class StateComponentDefinition<S : State, A : Action, V : Event, F : Effe
  * DSL function to create an advanced reusable state component
  */
 public inline fun <S : State, A : Action, V : Event, F : Effect> stateComponent(
-    builder: StateComponentBuilder<S, A, V, F>.() -> Unit
+    builder: StateComponentBuilder<S, A, V, F>.() -> Unit,
 ): StateComponentDefinition<S, A, V, F> {
     val componentBuilder = StateComponentBuilder<S, A, V, F>()
     componentBuilder.apply(builder)

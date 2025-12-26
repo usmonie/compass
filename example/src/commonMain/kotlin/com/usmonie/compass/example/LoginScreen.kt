@@ -1,6 +1,7 @@
-package com.usmonie.compass.example// navigation/AppScreens.kt
+package com.usmonie.compass.example
+
 import User
-import com.usmonie.compass.core.navigation.ScreenId
+import com.usmonie.compass.screen.state.navigation.ScreenId
 
 internal object LoginScreen : ScreenId("login")
 internal data class ProfileScreen(val user: User) : ScreenId("profile")

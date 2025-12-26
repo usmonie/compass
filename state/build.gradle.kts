@@ -1,9 +1,5 @@
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
-
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.androidLibrary)
+    id("feature-domain-conventions")
     id("maven-publish")
 }
 
@@ -91,109 +87,12 @@ publishing {
 }
 
 kotlin {
-    explicitApi()
-    jvmToolchain(23)
-    androidTarget {
-        publishLibraryVariants("release")
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test)
-    }
-    explicitApi()
-
-    // iOS targets
-    listOf(
-        iosX64(),
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach {
-        it.binaries.framework {
-            baseName = "CompassState"
-            isStatic = true
-        }
-    }
-
-    // Desktop JVM target
-    jvm()
-
-    // Убираем проблемные native targets временно
-    // Linux Native targets
-    // linuxX64()
-    // linuxArm64()
-
-    // macOS Native targets
-    // macosX64()
-    // macosArm64()
-
-    // Windows Native targets
-    // mingwX64()
-
-    // Web targets
-    js(IR) {
-        browser()
-        nodejs()
-
-        browser {
-            testTask {
-                enabled = false
-            }
-        }
-
-        nodejs {
-            testTask {
-                useMocha {
-                    timeout = "10s"
-                }
-            }
-        }
-    }
-
-    // WASM target (экспериментальный)
-    if (project.findProperty("compass.enable.wasm") == "true") {
-        @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
-        wasmJs {
-            browser()
-
-            browser {
-                testTask {
-                    enabled = false
-                }
-            }
-        }
-    }
-
-    sourceSets.all {
-        languageSettings.enableLanguageFeature("ExplicitBackingFields")
-        // languageSettings.enableLanguageFeature("-Xskip-prerelease-check") // Удаляем неподдерживаемую опцию
-    }
+    setupCompassAndroidLibrary()
 
     sourceSets {
         commonMain.dependencies {
-            api(libs.androidx.collections)
-            api(libs.androidx.navigation3.compose)
-            api(libs.coroutines.core)
-        }
-
-        commonTest.dependencies {
-            implementation(kotlin("test"))
-            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.androidx.navigation3.compose)
+            implementation(libs.kotlinx.serialization.core)
         }
     }
-}
-
-android {
-    namespace = "com.usmonie.compass.state"
-    compileSdk = 36
-
-    defaultConfig {
-        minSdk = 23
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_23
-        targetCompatibility = JavaVersion.VERSION_23
-    }
-}
-
-dependencies {
-  api("org.jetbrains.kotlin:kotlin-stdlib:2.2.20")
 }

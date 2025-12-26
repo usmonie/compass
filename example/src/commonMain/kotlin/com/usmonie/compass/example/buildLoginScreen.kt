@@ -86,10 +86,11 @@ internal fun buildLoginScreen(onLoginSuccess: (User) -> Unit): StateScreenDestin
                 }
             }
         }
-        onEffect { effect ->
+        onEffect { state, effect ->
             when (effect) {
                 is LoginEffect.NavigateToProfile -> onLoginSuccess(effect.user)
                 is LoginEffect.ShowToast -> println("Toast: ${effect.message}") // Replace with real toast
+                null -> Unit
             }
         }
     }

@@ -1,5 +1,9 @@
 package com.usmonie.compass.example
 
+import LoginAction
+import LoginEffect
+import LoginEvent
+import LoginState
 import User
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -17,13 +21,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
-import androidx.navigation3.scene.rememberSceneSetupNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.usmonie.compass.component.state.onLoading
 import com.usmonie.compass.component.state.onSuccess
-import com.usmonie.compass.core.navigation.ScreenId
+import com.usmonie.compass.screen.state.navigation.ScreenId
 import com.usmonie.compass.screen.state.SimpleAction
 import com.usmonie.compass.screen.state.SimpleEffect
 import com.usmonie.compass.screen.state.SimpleEvent
@@ -34,23 +37,20 @@ import com.usmonie.compass.screen.state.stateEntry
 import com.usmonie.compass.state.ContentState
 
 @Composable
-internal fun App() {
+internal fun ExampleApp() {
     var backStack: List<ScreenId> by remember { mutableStateOf(listOf(LoginScreen)) }
 
-    val entryProvider = entryProvider {
-        stateEntry(
-            LoginScreen,
-            {
+    val entryProvider: (ScreenId) -> NavEntry<ScreenId> = entryProvider {
+        simpleEntry<ProfileScreen, ProfileScreenState>() {
+            buildProfileScreen(it.user)
+        }
+
+        stateEntry<LoginScreen, LoginState, LoginAction, LoginEvent, LoginEffect>(
+            screenDestination = {
                 buildLoginScreen {
                     backStack = backStack.toMutableList().apply { add(ProfileScreen(it)) }
                 }
             }
-        )
-
-        simpleEntry<ProfileScreen, ProfileScreenState>(
-            screenDestination = {
-                buildProfileScreen(it.user)
-            },
         )
     }
 
@@ -65,16 +65,6 @@ internal fun App() {
                     targetScale = 0.9f,
                     transformOrigin = TransformOrigin(pivotFractionX = 0.5f, pivotFractionY = 0.5f)
                 )
-            },
-            entryDecorators = listOf(
-                // Add the default decorators for managing scenes and saving state
-                rememberSceneSetupNavEntryDecorator(),
-                rememberSavedStateNavEntryDecorator(),
-            ),
-            onBack = { count ->
-                repeat(count) {
-                    if (backStack.size > 1) backStack = backStack.dropLast(1)
-                }
             },
             entryProvider = entryProvider
         )
