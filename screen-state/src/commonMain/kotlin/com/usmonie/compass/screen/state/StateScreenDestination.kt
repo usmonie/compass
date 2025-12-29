@@ -15,6 +15,7 @@ import com.usmonie.compass.state.EventHandler
 import com.usmonie.compass.state.State
 import com.usmonie.compass.state.StateManager
 import com.usmonie.compass.state.StateViewModel
+import com.usmonie.compass.state.SubscriptionKey
 import com.usmonie.compass.state.createStateViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.KSerializer
@@ -26,7 +27,12 @@ import kotlinx.serialization.serializer
  */
 public class StateScreenBuilder<K : ScreenId, S : State, A : Action, V : Event, F : Effect> {
     private var initialState: S? = null
-    private var processAction: (suspend CoroutineScope.(A, S) -> V)? = null
+    private var processAction: (suspend CoroutineScope.(
+        action: A,
+        state: S,
+        emit: suspend (V) -> Unit,
+        launchFlow: suspend (key: SubscriptionKey, block: suspend CoroutineScope.() -> Unit) -> Unit,
+    ) -> Unit)? = null
     private var handleEvent: ((V, S) -> F?)? = null
     private var reduce: (S.(V) -> S)? = null
     private var content: (@Composable (S, (A) -> Unit) -> Unit)? = null
@@ -36,13 +42,20 @@ public class StateScreenBuilder<K : ScreenId, S : State, A : Action, V : Event, 
         initialState = state
     }
 
-    public fun processAction(processor: suspend CoroutineScope.(A, S) -> V) {
+    public fun processAction(
+        processor: suspend CoroutineScope.(
+            A,
+            S,
+            emit: suspend (V) -> Unit,
+            launchFlow: suspend (key: SubscriptionKey, block: suspend CoroutineScope.() -> Unit) -> Unit,
+        ) -> Unit,
+    ) {
         processAction = processor
     }
 
     public fun processAction(actionProcessor: ActionProcessor<A, S, V>) {
-        processAction = { action, state ->
-            actionProcessor.process(this, action, state)
+        processAction = { scope, action, state, emit, launchFlow ->
+            actionProcessor.process(scope, action, state, emit, launchFlow)
         }
     }
 

@@ -2,10 +2,14 @@ package com.usmonie.compass.component.state
 
 import androidx.compose.runtime.Composable
 import com.usmonie.compass.state.Action
+import com.usmonie.compass.state.ActionProcessor
 import com.usmonie.compass.state.Effect
 import com.usmonie.compass.state.Event
+import com.usmonie.compass.state.EventHandler
 import com.usmonie.compass.state.State
+import com.usmonie.compass.state.StateManager
 import com.usmonie.compass.state.StateViewModel
+import com.usmonie.compass.state.SubscriptionKey
 import com.usmonie.compass.state.createStateViewModel
 import kotlinx.coroutines.CoroutineScope
 
@@ -15,31 +19,63 @@ import kotlinx.coroutines.CoroutineScope
 public class StateComponentBuilder<S : State, A : Action, V : Event, F : Effect> {
     private var viewModel: StateViewModel<S, A, V, F>? = null
     private var initialStateProvider: (() -> S)? = null
-    private var processAction: (suspend CoroutineScope.(A, S) -> V)? = null
+    private var processAction: (suspend CoroutineScope.(
+        action: A,
+        state: S,
+        emit: suspend (V) -> Unit,
+        launchFlow: suspend (key: SubscriptionKey, block: suspend CoroutineScope.() -> Unit) -> Unit,
+    ) -> Unit)? = null
+
     private var handleEvent: ((V, S) -> F?)? = null
     private var reduce: (S.(V) -> S)? = null
     private var content: (@Composable (S, (A) -> Unit) -> Unit)? = null
     private var onEffect: (@Composable (S, F?) -> Unit)? = null
     private var init: (StateViewModel<S, A, V, F>.() -> Unit)? = null
 
+    public fun viewModel(viewModel: () -> StateViewModel<S, A, V, F>) {
+        this.viewModel = viewModel()
+    }
+
     public fun initialStateProvider(provider: () -> S) {
         initialStateProvider = provider
     }
 
-    public fun processAction(processor: suspend CoroutineScope.(A, S) -> V) {
+
+    public fun processAction(
+        processor: suspend CoroutineScope.(
+            A,
+            S,
+            emit: suspend (V) -> Unit,
+            launchFlow: suspend (key: SubscriptionKey, block: suspend CoroutineScope.() -> Unit) -> Unit,
+        ) -> Unit,
+    ) {
         processAction = processor
     }
 
-    public fun viewModel(viewModel: () -> StateViewModel<S, A, V, F>) {
-        this.viewModel = viewModel()
+    public fun processAction(actionProcessor: ActionProcessor<A, S, V>) {
+        processAction = { scope, action, state, emit, launchFlow ->
+            actionProcessor.process(scope, action, state, emit, launchFlow)
+        }
     }
 
     public fun handleEvent(handler: (V, S) -> F?) {
         handleEvent = handler
     }
 
+    public fun handleEvent(handler: EventHandler<V, S, F>) {
+        handleEvent = { event, state ->
+            handler.handle(event, state)
+        }
+    }
+
     public fun reduce(reducer: S.(V) -> S) {
         reduce = reducer
+    }
+
+    public fun reduce(manager: StateManager<S, V>) {
+        reduce = { event ->
+            manager.reduce(this, event)
+        }
     }
 
     public fun content(composable: @Composable (S, (A) -> Unit) -> Unit) {
@@ -114,4 +150,31 @@ public inline fun <S : State, A : Action, V : Event, F : Effect> stateComponent(
     val componentBuilder = StateComponentBuilder<S, A, V, F>()
     componentBuilder.apply(builder)
     return componentBuilder.build()
+}
+
+/**
+ * DSL функция с опциональными параметрами
+ */
+public inline fun <S : State, A : Action, V : Event, F : Effect> stateComponent(
+    actionProcessor: ActionProcessor<A, S, V>? = null,
+    eventHandler: EventHandler<V, S, F>? = null,
+    stateManager: StateManager<S, V>? = null,
+    builder: StateComponentBuilder< S, A, V, F>.() -> Unit,
+): StateComponentDefinition<S, A, V, F> {
+    val screenBuilder = StateComponentBuilder<S, A, V, F>()
+
+    if (actionProcessor != null) {
+        screenBuilder.processAction(actionProcessor)
+    }
+
+    if (eventHandler != null) {
+        screenBuilder.handleEvent(eventHandler)
+    }
+
+    if (stateManager != null) {
+        screenBuilder.reduce(stateManager)
+    }
+
+    screenBuilder.apply(builder)
+    return screenBuilder.build()
 }

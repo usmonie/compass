@@ -67,10 +67,12 @@ import kotlinx.coroutines.launch
  */
 public abstract class StateViewModel<S : State, in A : Action, V : Event, out F : Effect>(
     initialState: S,
-    protected val defaultDispatcher: CoroutineDispatcher = Dispatchers.Main.immediate
+    protected val defaultDispatcher: CoroutineDispatcher = Dispatchers.Main.immediate,
 ) : ViewModel {
     private val viewModelJob = SupervisorJob()
     protected val viewModelScope: CoroutineScope = CoroutineScope(viewModelJob + defaultDispatcher)
+
+    private val flowController = FlowController()
 
     /**
      * The current state as a StateFlow. UI components should observe this to react to state changes.
@@ -82,6 +84,7 @@ public abstract class StateViewModel<S : State, in A : Action, V : Event, out F 
         field = MutableStateFlow(initialState)
 
     private val _effect = Channel<F>()
+
     /**
      * A Flow of side effects that should be handled by the UI.
      *
@@ -108,15 +111,27 @@ public abstract class StateViewModel<S : State, in A : Action, V : Event, out F 
      *
      * @param action The user action to be handled
      */
-    @Suppress("TooGenericExceptionCaught")
     public fun handleAction(action: A) {
         viewModelScope.launch {
-            try {
-                val event = processAction(action)
-                handleState(event)
-            } catch (e: Exception) {
-                mapErrorToEvent(e)?.let { handleState(it) }
-            }
+            processAction(
+                action = action,
+                state = state.value,
+                emit = { event ->
+                    handleEventInternal(event)
+                },
+                launchFlow = { key, block ->
+                    launchFlow(key, block)
+                }
+            )
+        }
+    }
+
+    private suspend fun handleEventInternal(event: V) {
+        val newState = state.value.reduce(event)
+        state.emit(newState)
+
+        handleEvent(event)?.let {
+            _effect.send(it)
         }
     }
 
@@ -168,7 +183,12 @@ public abstract class StateViewModel<S : State, in A : Action, V : Event, out F 
      * @param action The user action to process
      * @return The resulting event that will be used to update the state
      */
-    protected abstract suspend fun processAction(action: A): V
+    protected abstract suspend fun processAction(
+        action: A,
+        state: S,
+        emit: suspend (V) -> Unit,
+        launchFlow: suspend (key: SubscriptionKey, block: suspend CoroutineScope.() -> Unit) -> Unit,
+    )
 
     /**
      * Handles an event and potentially produces a side effect.
@@ -189,6 +209,7 @@ public abstract class StateViewModel<S : State, in A : Action, V : Event, out F 
      * memory leaks and cancel any ongoing operations.
      */
     override fun onDispose() {
+        stopAllFlows()
         viewModelJob.cancel()
     }
 
@@ -202,7 +223,7 @@ public abstract class StateViewModel<S : State, in A : Action, V : Event, out F 
      * @return The Job representing the launched coroutine
      */
     protected fun CoroutineScope.launchSafe(
-        block: suspend CoroutineScope.() -> Unit
+        block: suspend CoroutineScope.() -> Unit,
     ): Job = launch(
         CoroutineExceptionHandler { _, throwable ->
             // Default error handling - can be customized by overriding onReduceError
@@ -210,5 +231,20 @@ public abstract class StateViewModel<S : State, in A : Action, V : Event, out F 
         }
     ) {
         block()
+    }
+
+    protected fun launchFlow(
+        key: SubscriptionKey,
+        block: suspend CoroutineScope.() -> Unit,
+    ) {
+        flowController.launch(key, viewModelScope, block)
+    }
+
+    protected fun stopFlow(key: SubscriptionKey) {
+        flowController.stop(key)
+    }
+
+    protected fun stopAllFlows() {
+        flowController.stopAll()
     }
 }

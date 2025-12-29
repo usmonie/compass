@@ -24,7 +24,7 @@ import kotlinx.coroutines.CoroutineScope
  * }
  * ```
  */
-public fun interface ActionProcessor<Action : com.usmonie.compass.state.Action, State : com.usmonie.compass.state.State, out Event : com.usmonie.compass.state.Event> {
+public fun interface ActionProcessor<in Action : com.usmonie.compass.state.Action, State : com.usmonie.compass.state.State, out Event : com.usmonie.compass.state.Event> {
     /**
      * Processes a user action and produces an event based on the current state.
      *
@@ -40,6 +40,8 @@ public fun interface ActionProcessor<Action : com.usmonie.compass.state.Action, 
     public suspend fun process(
         coroutineScope: CoroutineScope,
         action: Action,
-        state: State
-    ): Event
+        state: State,
+        emit: suspend (Event) -> Unit,
+        launchFlow: suspend (key: SubscriptionKey, block: suspend CoroutineScope.() -> Unit) -> Unit,
+    )
 }

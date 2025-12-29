@@ -3,7 +3,6 @@
 package com.usmonie.compass.state
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
@@ -15,7 +14,12 @@ public typealias ProcessAction<A, S, V> = suspend CoroutineScope.(A, S, suspend 
  */
 public inline fun <S : State, A : Action, V : Event, F : Effect> createStateViewModel(
     initialState: S,
-    crossinline processAction: suspend CoroutineScope.(A, S) -> V,
+    crossinline processAction: suspend CoroutineScope.(
+        action: A,
+        state: S,
+        emit: suspend (V) -> Unit,
+        launchFlow: suspend (key: SubscriptionKey, block: suspend CoroutineScope.() -> Unit) -> Unit,
+    ) -> Unit,
     crossinline handleEvent: (V, S) -> F?,
     crossinline reduce: S.(V) -> S,
     noinline init: suspend StateViewModel<S, A, V, F>.() -> Unit = {},
@@ -27,8 +31,18 @@ public inline fun <S : State, A : Action, V : Event, F : Effect> createStateView
         }
     }
 
-    override suspend fun processAction(action: A): V =
-        processAction(this.viewModelScope, action, this.state.value)
+    override suspend fun processAction(
+        action: A,
+        state: S,
+        emit: suspend (V) -> Unit,
+        launchFlow: suspend (key: SubscriptionKey, block: suspend CoroutineScope.() -> Unit) -> Unit,
+    ): Unit = processAction(
+        this.viewModelScope,
+        action,
+        this.state.value,
+        emit,
+        launchFlow
+    )
 
     override fun handleEvent(event: V): F? =
         handleEvent(event, this.state.value)
@@ -36,55 +50,6 @@ public inline fun <S : State, A : Action, V : Event, F : Effect> createStateView
     override fun S.reduce(event: V): S =
         reduce(event)
 }
-
-
-/**
- * ActionProcessor that can emit multiple events.
- */
-public fun interface FlowActionProcessor<ACTION_TYPE : Action, STATE_TYPE : State, out EVENT_TYPE : Event> {
-    public suspend fun process(
-        coroutineScope: CoroutineScope,
-        action: ACTION_TYPE,
-        state: STATE_TYPE
-    ): Flow<EVENT_TYPE>
-}
-
-/**
- * Extension function to create a FlowActionProcessor
- */
-public inline fun <A_ACTION : Action, S_STATE : State, V_EVENT : Event> flowActionProcessor(
-    crossinline process: suspend CoroutineScope.(A_ACTION, S_STATE) -> Flow<V_EVENT>
-): FlowActionProcessor<A_ACTION, S_STATE, V_EVENT> = FlowActionProcessor { scope, action, state ->
-    process(scope, action, state)
-}
-
-/**
- * Extension function to create a simple ActionProcessor (Single Event)
- */
-public inline fun <A_ACTION : Action, S_STATE : State, V_EVENT : Event> actionProcessor(
-    crossinline process: suspend CoroutineScope.(A_ACTION, S_STATE) -> V_EVENT
-): ActionProcessor<A_ACTION, S_STATE, V_EVENT> = ActionProcessor { scope, action, state ->
-    scope.process(action, state)
-}
-
-/**
- * Extension function to create a simple StateManager
- */
-public inline fun <S : State, V : Event> stateManager(
-    crossinline reduce: S.(V) -> S
-): StateManager<S, V> = StateManager { state, event ->
-    state.reduce(event)
-}
-
-/**
- * Extension function to create a simple EventHandler
- */
-public inline fun <V : Event, S : State, F : Effect> eventHandler(
-    crossinline handle: (V, S) -> F?
-): EventHandler<V, S, F> = EventHandler { event, state ->
-    handle(event, state)
-}
-
 /**
  * Extension function to create a simple state with loading, success, error states
  */
