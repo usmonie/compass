@@ -12,13 +12,18 @@ import androidx.navigationevent.NavigationEvent
 public fun <T : Any> predictivePopSlideTransitionSpec():
         AnimatedContentTransitionScope<Scene<T>>.(@NavigationEvent.SwipeEdge Int) -> ContentTransform =
     {
+        val slideOut = slideOutOfContainer(
+            when (it) {
+                NavigationEvent.EDGE_RIGHT -> AnimatedContentTransitionScope.SlideDirection.Start
+                NavigationEvent.EDGE_LEFT -> AnimatedContentTransitionScope.SlideDirection.End
+                else -> AnimatedContentTransitionScope.SlideDirection.End
+            },
+        )
         ContentTransform(
-            fadeIn(
-                spring(
-                    dampingRatio = 1.0f, // reflects material3 motionScheme.defaultEffectsSpec()
-                    stiffness = 1600.0f, // reflects material3 motionScheme.defaultEffectsSpec()
-                )
-            ) + scaleIn(initialScale = 0.95f),
-            scaleOut(targetScale = 0.8f) + slideOutOfContainer(AnimatedContentTransitionScope.SlideDirection.End),
+            fadeIn() + scaleIn(initialScale = 0.9f),
+            scaleOut(
+                targetScale = 0.7f,
+                animationSpec = spring(stiffness = 3000f)
+            ) + slideOut,
         )
     }
