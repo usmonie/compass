@@ -72,6 +72,7 @@ public abstract class StateViewModel<S : State, in A : Action, V : Event, out F 
     private val viewModelJob = SupervisorJob()
     protected val viewModelScope: CoroutineScope = CoroutineScope(viewModelJob + defaultDispatcher)
 
+    private val flowController = FlowController()
     /**
      * The current state as a StateFlow. UI components should observe this to react to state changes.
      *
@@ -91,6 +92,7 @@ public abstract class StateViewModel<S : State, in A : Action, V : Event, out F 
      * Note: Only one subscriber per ViewModel is supported for effects.
      */
     public val effect: Flow<F> = _effect.receiveAsFlow()
+    protected abstract val actionProcessor: ActionProcessor<A, S, V>
 
     /**
      * Handles user actions by converting them into events, then into state changes and possible side effects.
@@ -108,15 +110,28 @@ public abstract class StateViewModel<S : State, in A : Action, V : Event, out F 
      *
      * @param action The user action to be handled
      */
-    @Suppress("TooGenericExceptionCaught")
     public fun handleAction(action: A) {
         viewModelScope.launch {
-            try {
-                val event = processAction(action)
-                handleState(event)
-            } catch (e: Exception) {
-                mapErrorToEvent(e)?.let { handleState(it) }
-            }
+            actionProcessor.process(
+                coroutineScope = this,
+                action = action,
+                state = state.value,
+                emit = { event ->
+                    handleEventInternal(event)
+                },
+                launchFlow = { key, block ->
+                    launchFlow(key, block)
+                }
+            )
+        }
+    }
+
+    private suspend fun handleEventInternal(event: V) {
+        val newState = state.value.reduce(event)
+        state.emit(newState)
+
+        handleEvent(event)?.let {
+            _effect.send(it)
         }
     }
 
@@ -189,6 +204,7 @@ public abstract class StateViewModel<S : State, in A : Action, V : Event, out F 
      * memory leaks and cancel any ongoing operations.
      */
     override fun onDispose() {
+        stopAllFlows()
         viewModelJob.cancel()
     }
 
@@ -210,5 +226,20 @@ public abstract class StateViewModel<S : State, in A : Action, V : Event, out F 
         }
     ) {
         block()
+    }
+
+    protected fun launchFlow(
+        key: SubscriptionKey,
+        block: suspend CoroutineScope.() -> Unit
+    ) {
+        flowController.launch(key, viewModelScope, block)
+    }
+
+    protected fun stopFlow(key: SubscriptionKey) {
+        flowController.stop(key)
+    }
+
+    protected fun stopAllFlows() {
+        flowController.stopAll()
     }
 }

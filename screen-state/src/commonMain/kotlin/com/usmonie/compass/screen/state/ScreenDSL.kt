@@ -14,8 +14,10 @@ import com.usmonie.compass.state.State
 import com.usmonie.compass.state.StateManager
 import kotlin.jvm.JvmSuppressWildcards
 
+// ============= ОСНОВНЫЕ DSL ФУНКЦИИ =============
+
 /**
- * DSL function to create a state-managed screen
+ * DSL функция для создания state-managed screen
  */
 public inline fun <K : ScreenId, S : State, A : Action, V : Event, F : Effect> stateScreen(
     id: K,
@@ -28,7 +30,7 @@ public inline fun <K : ScreenId, S : State, A : Action, V : Event, F : Effect> s
 }
 
 /**
- * DSL function to create a state-managed screen
+ * DSL функция с явными параметрами (использует ActionProcessor)
  */
 public fun <K : ScreenId, S : State, A : Action, V : Event, F : Effect> stateScreen(
     id: K,
@@ -51,7 +53,7 @@ public fun <K : ScreenId, S : State, A : Action, V : Event, F : Effect> stateScr
 }
 
 /**
- * DSL function to create a state-managed screen
+ * DSL функция с опциональными параметрами
  */
 public inline fun <K : ScreenId, S : State, A : Action, V : Event, F : Effect> stateScreen(
     id: K,
@@ -62,21 +64,19 @@ public inline fun <K : ScreenId, S : State, A : Action, V : Event, F : Effect> s
     builder: StateScreenBuilder<K, S, A, V, F>.() -> Unit,
 ): StateScreenDestination<K, S, A, V, F> {
     val screenBuilder = StateScreenBuilder<K, S, A, V, F>()
+
     if (actionProcessor != null) {
-        screenBuilder.processAction { action, state ->
-            actionProcessor.process(this, action, state)
-        }
+        screenBuilder.processAction(actionProcessor)
     }
+
     if (eventHandler != null) {
-        screenBuilder.handleEvent { event, state ->
-            eventHandler.handle(event, state)
-        }
+        screenBuilder.handleEvent(eventHandler)
     }
+
     if (stateManager != null) {
-        screenBuilder.reduce { event ->
-            stateManager.reduce(this, event)
-        }
+        screenBuilder.reduce(stateManager)
     }
+
     screenBuilder.apply(builder)
     return screenBuilder.build(id, storeInBackStack)
 }
