@@ -37,6 +37,7 @@ public inline fun <S : State, A : Action, V : Event, F : Effect> createStateView
         reduce(event)
 }
 
+
 /**
  * ActionProcessor that can emit multiple events.
  */
