@@ -94,7 +94,7 @@ public inline fun <K : ScreenId, S : State> simpleStateScreen(
     screenBuilder.apply {
         builder()
         initialState(initialState)
-        processAction { action, _ ->
+        processAction { action, _, _, _ ->
             when (action) {
                 is SimpleAction.UpdateState<S> -> SimpleEvent.StateUpdated(action.newState)
             }
