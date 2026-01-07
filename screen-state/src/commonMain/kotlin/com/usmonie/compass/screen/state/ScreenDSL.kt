@@ -12,6 +12,7 @@ import com.usmonie.compass.state.Event
 import com.usmonie.compass.state.EventHandler
 import com.usmonie.compass.state.State
 import com.usmonie.compass.state.StateManager
+import com.usmonie.compass.state.StateViewModel
 import kotlin.jvm.JvmSuppressWildcards
 
 // ============= ОСНОВНЫЕ DSL ФУНКЦИИ =============
@@ -39,11 +40,13 @@ public fun <K : ScreenId, S : State, A : Action, V : Event, F : Effect> stateScr
     processor: ActionProcessor<A, S, V>,
     handler: EventHandler<V, S, F>,
     manager: StateManager<S, V>,
+    onInit: (StateViewModel<S, A, V, F>.() -> Unit)? = null,
     screen: @Composable (S, (A) -> Unit) -> Unit,
 ): StateScreenDestination<K, S, A, V, F> {
     val screenBuilder = StateScreenBuilder<K, S, A, V, F>()
     screenBuilder.apply {
         initialState(initialState)
+        onInit?.let(::init)
         processAction(processor)
         handleEvent(handler)
         reduce(manager)
