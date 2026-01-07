@@ -1,5 +1,6 @@
 package com.usmonie.compass.state
 
+import androidx.compose.runtime.Immutable
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -65,6 +66,8 @@ import kotlinx.coroutines.launch
  * @param initialState The initial state of the component
  * @param defaultDispatcher The default coroutine dispatcher that the ViewModel will use
  */
+
+@Immutable
 public abstract class StateViewModel<S : State, in A : Action, V : Event, out F : Effect>(
     initialState: S,
     protected val defaultDispatcher: CoroutineDispatcher = Dispatchers.Main.immediate,

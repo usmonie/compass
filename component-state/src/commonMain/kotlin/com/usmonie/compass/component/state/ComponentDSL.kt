@@ -40,7 +40,6 @@ public class StateComponentBuilder<S : State, A : Action, V : Event, F : Effect>
         initialStateProvider = provider
     }
 
-
     public fun processAction(
         processor: suspend CoroutineScope.(
             A,

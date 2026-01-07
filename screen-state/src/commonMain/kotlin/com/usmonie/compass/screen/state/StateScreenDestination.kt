@@ -27,6 +27,7 @@ import kotlinx.serialization.serializer
  */
 public class StateScreenBuilder<K : ScreenId, S : State, A : Action, V : Event, F : Effect> {
     private var initialState: S? = null
+    private var init: (StateViewModel<S, A, V, F>.() -> Unit)? = null
     private var processAction: (suspend CoroutineScope.(
         action: A,
         state: S,
@@ -40,6 +41,10 @@ public class StateScreenBuilder<K : ScreenId, S : State, A : Action, V : Event, 
 
     public fun initialState(state: S) {
         initialState = state
+    }
+
+    public fun init(initializer: StateViewModel<S, A, V, F>.() -> Unit) {
+        init = initializer
     }
 
     public fun processAction(
@@ -98,7 +103,8 @@ public class StateScreenBuilder<K : ScreenId, S : State, A : Action, V : Event, 
                 initialState = requireNotNull(initialState) { "Initial state must be provided" },
                 processAction = requireNotNull(processAction) { "Action processor must be provided" },
                 handleEvent = requireNotNull(handleEvent) { "Event handler must be provided" },
-                reduce = requireNotNull(reduce) { "State reducer must be provided" }
+                reduce = requireNotNull(reduce) { "State reducer must be provided" },
+                init = init ?: {},
             ),
             content = requireNotNull(content) { "Content composable must be provided" },
             onEffect = onEffect ?: { _, _ -> }
