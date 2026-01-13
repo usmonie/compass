@@ -25,6 +25,11 @@ public fun <S : State, A : Action, V : Event, F : Effect> StateViewModel<S, A, V
     return this.state.collectAsState()
 }
 
+@Composable
+public fun <S : State, A : Action, V : Event, F : Effect> StateViewModel<S, A, V, F>.observeEffect(): androidx.compose.runtime.State<F?> {
+    return this.effect.collectAsState(null)
+}
+
 /**
  * Convenient composable for creating stateful UI with StateViewModel
  */
@@ -55,7 +60,7 @@ public inline fun <S : State, A : Action, V : Event, F : Effect> StateContent(
     crossinline content: @Composable (S, (A) -> Unit) -> Unit,
 ) {
     val state by viewModel.observeState()
-    val effect by viewModel.effect.collectAsState(null)
+    val effect by viewModel.observeEffect()
     onEffect(state, effect)
     content(state, remember(viewModel) { { viewModel.handleAction(it) } })
 }
