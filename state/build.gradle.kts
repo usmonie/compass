@@ -91,7 +91,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.androidx.navigation3.compose)
+            api(libs.androidx.navigation3.compose)
             implementation(libs.kotlinx.serialization.core)
         }
     }
