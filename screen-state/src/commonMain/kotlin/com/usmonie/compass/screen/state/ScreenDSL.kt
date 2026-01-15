@@ -15,8 +15,6 @@ import com.usmonie.compass.state.StateManager
 import com.usmonie.compass.state.StateViewModel
 import kotlin.jvm.JvmSuppressWildcards
 
-// ============= ОСНОВНЫЕ DSL ФУНКЦИИ =============
-
 /**
  * DSL функция для создания state-managed screen
  */
