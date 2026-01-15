@@ -73,7 +73,7 @@ public abstract class StateViewModel<S : State, in A : Action, V : Event, out F 
     protected val defaultDispatcher: CoroutineDispatcher = Dispatchers.Main.immediate,
 ) : ViewModel {
     private val viewModelJob = SupervisorJob()
-    protected val viewModelScope: CoroutineScope = CoroutineScope(viewModelJob + defaultDispatcher)
+    public val viewModelScope: CoroutineScope = CoroutineScope(viewModelJob + defaultDispatcher)
 
     private val flowController = FlowController()
 

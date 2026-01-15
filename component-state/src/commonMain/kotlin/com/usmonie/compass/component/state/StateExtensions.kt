@@ -3,10 +3,10 @@
 package com.usmonie.compass.component.state
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.usmonie.compass.state.Action
 import com.usmonie.compass.state.ContentState
 import com.usmonie.compass.state.Effect
@@ -27,7 +27,7 @@ public fun <S : State, A : Action, V : Event, F : Effect> StateViewModel<S, A, V
 
 @Composable
 public fun <S : State, A : Action, V : Event, F : Effect> StateViewModel<S, A, V, F>.observeEffect(): androidx.compose.runtime.State<F?> {
-    return this.effect.collectAsState(null)
+    return this.effect.collectAsStateWithLifecycle(null)
 }
 
 /**
@@ -40,12 +40,6 @@ public inline fun <S : State, A : Action, V : Event, F : Effect> SimpleStateCont
     crossinline content: @Composable (S, (A) -> Unit) -> Unit,
 ) {
     val state by viewModel.observeState()
-
-    LaunchedEffect(viewModel) {
-        viewModel.effect.collect { effect ->
-            onEffect(effect)
-        }
-    }
 
     content(state, viewModel::handleAction)
 }
