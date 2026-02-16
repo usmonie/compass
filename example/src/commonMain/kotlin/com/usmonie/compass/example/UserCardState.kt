@@ -12,7 +12,7 @@ internal data class UserCardEffect(val userId: String) : Effect
 
 internal val UserCardComponent = stateComponent<UserCardState, UserCardAction, UserCardEvent, UserCardEffect> {
     initialStateProvider { UserCardState(User("1", "Loading...")) }
-    processAction { _, _ -> UserCardEvent }
+    processAction { _, _, _, _ ->  }
     handleEvent { _, _ -> null }
     reduce { this }
     content { state, _ ->

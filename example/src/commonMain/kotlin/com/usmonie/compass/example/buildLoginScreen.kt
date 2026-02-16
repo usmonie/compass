@@ -26,7 +26,7 @@ internal fun buildLoginScreen(onLoginSuccess: (User) -> Unit): StateScreenDestin
         storeInBackStack = true
     ) {
         initialState(LoginState())
-        processAction { action, state ->
+        processAction { action, state, _, _ ->
             when (action) {
                 is LoginAction.EnterEmail -> LoginEvent.EmailChanged(action.email)
                 is LoginAction.EnterPassword -> LoginEvent.PasswordChanged(action.password)
