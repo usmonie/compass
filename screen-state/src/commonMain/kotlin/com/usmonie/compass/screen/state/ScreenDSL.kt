@@ -39,6 +39,7 @@ public fun <K : ScreenId, S : State, A : Action, V : Event, F : Effect> stateScr
     handler: EventHandler<V, S, F>,
     manager: StateManager<S, V>,
     onInit: (StateViewModel<S, A, V, F>.() -> Unit)? = null,
+    onEffect: (@Composable (S, F?) -> Unit)? = null,
     screen: @Composable (S, (A) -> Unit) -> Unit,
 ): StateScreenDestination<K, S, A, V, F> {
     val screenBuilder = StateScreenBuilder<K, S, A, V, F>()
@@ -48,6 +49,9 @@ public fun <K : ScreenId, S : State, A : Action, V : Event, F : Effect> stateScr
         processAction(processor)
         handleEvent(handler)
         reduce(manager)
+        if (onEffect != null) {
+            onEffect(onEffect)
+        }
         content { state, onAction -> screen(state, onAction) }
     }
     return screenBuilder.build(id, storeInBackStack)
@@ -91,7 +95,8 @@ public inline fun <K : ScreenId, S : State> simpleStateScreen(
     storeInBackStack: Boolean = true,
     builder: StateScreenBuilder<K, S, SimpleAction<S>, SimpleEvent<S>, SimpleEffect>.() -> Unit,
 ): StateScreenDestination<K, S, SimpleAction<S>, SimpleEvent<S>, SimpleEffect> {
-    val screenBuilder = StateScreenBuilder<K, S, SimpleAction<S>, SimpleEvent<S>, SimpleEffect>()
+    val screenBuilder =
+        StateScreenBuilder<K, S, SimpleAction<S>, SimpleEvent<S>, SimpleEffect>()
     screenBuilder.apply {
         builder()
         initialState(initialState)
@@ -161,6 +166,21 @@ public inline fun <reified K : ScreenId, S : State, A : Action, V : Event, F : E
 }
 
 public inline fun <reified K : ScreenId> EntryProviderScope<ScreenId>.entry(
+    noinline contentKey: (key: @JvmSuppressWildcards K) -> Any = { it.toString() },
+    metadata: Map<String, Any> = emptyMap(),
+    noinline screenDestination: (K) -> ScreenDestination<K>,
+) {
+    entry<K>(
+        clazzContentKey = contentKey,
+        metadata = metadata,
+    ) {
+        val screenDestination = screenDestination(it)
+        screenDestination.Content()
+    }
+}
+
+
+public inline fun <reified K : ScreenId> EntryProviderScope<ScreenId>.screen(
     noinline contentKey: (key: @JvmSuppressWildcards K) -> Any = { it.toString() },
     metadata: Map<String, Any> = emptyMap(),
     noinline screenDestination: (K) -> ScreenDestination<K>,

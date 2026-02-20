@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -74,7 +74,7 @@ internal fun buildLoginScreen(onLoginSuccess: (User) -> Unit): StateScreenDestin
                         visualTransformation = PasswordVisualTransformation()
                     )
                     if (state.error != null) {
-                        Text(text = state.error, color = MaterialTheme.colorScheme.error)
+                        Text(text = state.error, color = colorScheme.error)
                     }
                     Button(
                         onClick = { sendAction(LoginAction.Submit) },

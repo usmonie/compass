@@ -6,7 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.usmonie.compass.state.Action
 import com.usmonie.compass.state.ContentState
 import com.usmonie.compass.state.Effect
@@ -27,7 +26,7 @@ public fun <S : State, A : Action, V : Event, F : Effect> StateViewModel<S, A, V
 
 @Composable
 public fun <S : State, A : Action, V : Event, F : Effect> StateViewModel<S, A, V, F>.observeEffect(): androidx.compose.runtime.State<F?> {
-    return this.effect.collectAsStateWithLifecycle(null)
+    return this.effect.collectAsState(null)
 }
 
 /**

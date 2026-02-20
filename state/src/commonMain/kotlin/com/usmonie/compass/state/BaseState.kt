@@ -58,6 +58,8 @@ public abstract class ErrorState(error: Throwable) : State {
     public val throwable: Throwable = error
 }
 
+public class ThrowableErrorState(th: Throwable) : ErrorState(th)
+
 /**
  * Base interface for representing events that occur in MVI architecture.
  * Events are the result of processing actions and trigger state changes.
