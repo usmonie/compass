@@ -16,7 +16,7 @@ import kotlinx.coroutines.CoroutineScope
 /**
  * State component builder with more customization options
  */
-public class StateComponentBuilder<S : State, A : Action, V : Event, F : Effect> {
+public class StateComponentBuilder<P, S : State, A : Action, V : Event, F : Effect> {
     private var viewModel: StateViewModel<S, A, V, F>? = null
     private var initialStateProvider: (() -> S)? = null
     private var processAction: (suspend CoroutineScope.(
@@ -28,7 +28,7 @@ public class StateComponentBuilder<S : State, A : Action, V : Event, F : Effect>
 
     private var handleEvent: ((V, S) -> F?)? = null
     private var reduce: (S.(V) -> S)? = null
-    private var content: (@Composable (S, (A) -> Unit) -> Unit)? = null
+    private var content: (@Composable (P, S, (A) -> Unit) -> Unit)? = null
     private var onEffect: (@Composable (S, F?) -> Unit)? = null
     private var init: (StateViewModel<S, A, V, F>.() -> Unit)? = null
 
@@ -77,7 +77,7 @@ public class StateComponentBuilder<S : State, A : Action, V : Event, F : Effect>
         }
     }
 
-    public fun content(composable: @Composable (S, (A) -> Unit) -> Unit) {
+    public fun content(composable: @Composable (P, S, (A) -> Unit) -> Unit) {
         content = composable
     }
 
@@ -89,7 +89,7 @@ public class StateComponentBuilder<S : State, A : Action, V : Event, F : Effect>
         init = initializer
     }
 
-    public fun build(): StateComponentDefinition<S, A, V, F> {
+    public fun build(): StateComponentDefinition<P, S, A, V, F> {
         return StateComponentDefinition(
             viewModel = viewModel ?: createStateViewModel(
                 initialState = requireNotNull(initialStateProvider) { "Initial state provider must be provided" }(),
@@ -107,20 +107,20 @@ public class StateComponentBuilder<S : State, A : Action, V : Event, F : Effect>
 /**
  * State component definition with lazy initialization and customization
  */
-public class StateComponentDefinition<S : State, A : Action, V : Event, F : Effect>(
+public class StateComponentDefinition<P, S : State, A : Action, V : Event, F : Effect>(
     private val viewModel: StateViewModel<S, A, V, F>,
-    private val content: @Composable (S, (A) -> Unit) -> Unit,
+    private val content: @Composable (P, S, (A) -> Unit) -> Unit,
     private val onEffect: @Composable (S, F?) -> Unit,
 ) {
     /**
      * Creates a Composable component instance with lazy state initialization
      */
     @Composable
-    public fun Component() {
+    public fun Component(params: P) {
         StateContent(
             viewModel = viewModel,
             onEffect = onEffect,
-            content = content
+            content = { state, onAction -> content(params, state, onAction) },
         )
     }
 
@@ -129,13 +129,14 @@ public class StateComponentDefinition<S : State, A : Action, V : Event, F : Effe
      */
     @Composable
     public fun Component(
+        params: P,
         customInitialStateProvider: (() -> S)? = null,
         customOnEffect: (@Composable (S, F?) -> Unit)? = null,
     ) {
         StateContent(
             viewModel = viewModel,
             onEffect = customOnEffect ?: onEffect,
-            content = content
+            content = { state, onAction -> content(params, state, onAction) },
         )
     }
 }
@@ -143,10 +144,10 @@ public class StateComponentDefinition<S : State, A : Action, V : Event, F : Effe
 /**
  * DSL function to create an advanced reusable state component
  */
-public inline fun <S : State, A : Action, V : Event, F : Effect> stateComponent(
-    builder: StateComponentBuilder<S, A, V, F>.() -> Unit,
-): StateComponentDefinition<S, A, V, F> {
-    val componentBuilder = StateComponentBuilder<S, A, V, F>()
+public inline fun <P, S : State, A : Action, V : Event, F : Effect> stateComponent(
+    builder: StateComponentBuilder<P, S, A, V, F>.() -> Unit,
+): StateComponentDefinition<P, S, A, V, F> {
+    val componentBuilder = StateComponentBuilder<P, S, A, V, F>()
     componentBuilder.apply(builder)
     return componentBuilder.build()
 }
@@ -154,13 +155,13 @@ public inline fun <S : State, A : Action, V : Event, F : Effect> stateComponent(
 /**
  * DSL функция с опциональными параметрами
  */
-public inline fun <S : State, A : Action, V : Event, F : Effect> stateComponent(
+public inline fun <P, S : State, A : Action, V : Event, F : Effect> stateComponent(
     actionProcessor: ActionProcessor<A, S, V>? = null,
     eventHandler: EventHandler<V, S, F>? = null,
     stateManager: StateManager<S, V>? = null,
-    builder: StateComponentBuilder< S, A, V, F>.() -> Unit,
-): StateComponentDefinition<S, A, V, F> {
-    val screenBuilder = StateComponentBuilder<S, A, V, F>()
+    builder: StateComponentBuilder<P, S, A, V, F>.() -> Unit,
+): StateComponentDefinition<P, S, A, V, F> {
+    val screenBuilder = StateComponentBuilder<P, S, A, V, F>()
 
     if (actionProcessor != null) {
         screenBuilder.processAction(actionProcessor)

@@ -1,10 +1,12 @@
 package com.usmonie.compass.screen.state.navigation
 
+import androidx.compose.runtime.Immutable
 import androidx.navigation3.runtime.NavKey
 import com.usmonie.compass.screen.state.Extra
 import kotlinx.serialization.Serializable
 
 @Serializable
+@Immutable
 public open class ScreenId(
     public val id: String,
     public open val mode: Mode = Mode.STANDARD,

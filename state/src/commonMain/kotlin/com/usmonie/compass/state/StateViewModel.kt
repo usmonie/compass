@@ -73,7 +73,7 @@ public abstract class StateViewModel<S : State, in A : Action, V : Event, out F 
     protected val defaultDispatcher: CoroutineDispatcher = Dispatchers.Main.immediate,
 ) : ViewModel {
     private val viewModelJob = SupervisorJob()
-    protected val viewModelScope: CoroutineScope = CoroutineScope(viewModelJob + defaultDispatcher)
+    public val viewModelScope: CoroutineScope = CoroutineScope(viewModelJob + defaultDispatcher)
 
     private val flowController = FlowController()
 
@@ -203,7 +203,10 @@ public abstract class StateViewModel<S : State, in A : Action, V : Event, out F 
      * @param event The event to handle
      * @return The side effect to emit, or null if no side effect is needed
      */
-    protected abstract fun handleEvent(event: V): F?
+    protected open fun handleEvent(event: V): F? {
+        @Suppress("UNCHECKED_CAST")
+        return event as? F
+    }
 
     /**
      * Clears the resources of the ViewModel, particularly cancelling any ongoing coroutine work.

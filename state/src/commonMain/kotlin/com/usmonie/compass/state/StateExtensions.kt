@@ -44,12 +44,11 @@ public inline fun <S : State, A : Action, V : Event, F : Effect> createStateView
         launchFlow
     )
 
-    override fun handleEvent(event: V): F? =
-        handleEvent(event, this.state.value)
+    override fun handleEvent(event: V): F? = handleEvent(event, this.state.value)
 
-    override fun S.reduce(event: V): S =
-        reduce(event)
+    override fun S.reduce(event: V): S = reduce(event)
 }
+
 /**
  * Extension function to create a simple state with loading, success, error states
  */
