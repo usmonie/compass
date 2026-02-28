@@ -7,9 +7,15 @@ import androidx.compose.runtime.staticCompositionLocalOf
 @Immutable
 public interface Navigator {
     public val size: Int
-    public fun navigateTo(id: ScreenId)
-    public fun pop()
+    public fun navigateTo(
+        id: ScreenId,
+        storeInBackstack: Boolean = true,
+        clearBackStack: Boolean = false,
+        mode: Mode = id.mode,
+        replace: Boolean = false,
+    )
 
+    public fun pop()
     public fun hide()
     public fun show()
 }
