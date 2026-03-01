@@ -104,6 +104,12 @@ public class StateComponentBuilder<P, S : State, A : Action, V : Event, F : Effe
     }
 }
 
+public interface ComponentDefinition<P> {
+    @Composable
+    public fun Component(params: P)
+}
+
+
 /**
  * State component definition with lazy initialization and customization
  */
@@ -111,12 +117,12 @@ public class StateComponentDefinition<P, S : State, A : Action, V : Event, F : E
     private val viewModel: StateViewModel<S, A, V, F>,
     private val content: @Composable (P, S, (A) -> Unit) -> Unit,
     private val onEffect: @Composable (S, F?) -> Unit,
-) {
+): ComponentDefinition<P> {
     /**
      * Creates a Composable component instance with lazy state initialization
      */
     @Composable
-    public fun Component(params: P) {
+    public override fun Component(params: P) {
         StateContent(
             viewModel = viewModel,
             onEffect = onEffect,

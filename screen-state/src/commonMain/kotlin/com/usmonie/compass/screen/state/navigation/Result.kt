@@ -25,29 +25,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 
-/**
- * Local for storing results in a [ResultStore]
- */
-public object LocalResultStore {
-    private val LocalResultStore: ProvidableCompositionLocal<ResultStore?> =
-        compositionLocalOf { null }
+public val LocalResultStore: ProvidableCompositionLocal<ResultStore> =
+    compositionLocalOf { throw RuntimeException("Result store not provided") }
 
-    /**
-     * The current [ResultStore]
-     */
-    public val current: ResultStore
-        @Composable
-        get() = LocalResultStore.current ?: error("No ResultStore has been provided")
-
-    /**
-     * Provides a [ResultStore] to the composition
-     */
-    public infix fun provides(
-        store: ResultStore
-    ): ProvidedValue<ResultStore?> {
-        return LocalResultStore.provides(store)
-    }
-}
 
 /**
  * Provides a [ResultStore] that will be remembered across configuration changes.

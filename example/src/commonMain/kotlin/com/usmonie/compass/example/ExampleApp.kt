@@ -85,7 +85,7 @@ private fun buildProfileScreen(user: User): StateScreenDestination<ProfileScreen
                     Scaffold {
                         Column {
                             Text("Welcome, ${user.name}!")
-                            UserCardComponent.Component()
+                            UserCardComponent.Component(Unit)
                         }
                     }
                 }

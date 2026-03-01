@@ -52,7 +52,7 @@ public abstract class ManagedStateComponent<
  * Composable function to create a stateful component with automatic state management
  */
 @Composable
-public inline fun <
+public fun <
         S : com.usmonie.compass.state.State,
         A : com.usmonie.compass.state.Action,
         V : com.usmonie.compass.state.Event,
@@ -60,8 +60,8 @@ public inline fun <
         VM : com.usmonie.compass.state.StateViewModel<S, A, V, F>
         > StatefulComponent(
     viewModel: VM,
-    crossinline onEffect: suspend (F) -> Unit = {},
-    crossinline content: @Composable (S, (A) -> Unit) -> Unit
+    onEffect: suspend (F) -> Unit = {},
+    content: @Composable (S, (A) -> Unit) -> Unit
 ) {
     val component = remember(viewModel) {
         object : ManagedStateComponent<S, A, V, F, VM>(viewModel) {

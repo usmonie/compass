@@ -10,12 +10,12 @@ internal object UserCardAction : Action
 internal object UserCardEvent : Event
 internal data class UserCardEffect(val userId: String) : Effect
 
-internal val UserCardComponent = stateComponent<UserCardState, UserCardAction, UserCardEvent, UserCardEffect> {
+internal val UserCardComponent = stateComponent<Unit, UserCardState, UserCardAction, UserCardEvent, UserCardEffect> {
     initialStateProvider { UserCardState(User("1", "Loading...")) }
     processAction { _, _, _, _ ->  }
     handleEvent { _, _ -> null }
     reduce { this }
-    content { state, _ ->
+    content { p, state, _ ->
         BasicText("Hello, ${state.user.name}!")
     }
 }
