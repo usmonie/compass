@@ -117,7 +117,7 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.androidx.collections)
             implementation(libs.kotlinx.serialization.json)
-            implementation(libs.androidx.navigation3.compose)
+            api(libs.androidx.navigation3.compose)
             implementation(libs.ui.backhandler)
 
             implementation(projects.compass.componentState)
