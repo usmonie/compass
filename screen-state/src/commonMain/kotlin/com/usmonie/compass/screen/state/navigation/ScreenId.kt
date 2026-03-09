@@ -24,7 +24,6 @@ public open class ScreenId(
     }
 
     override fun hashCode(): Int {
-        Exception().printStackTrace()
         var result = id.hashCode()
         result = 31 * result + mode.hashCode()
         return result
