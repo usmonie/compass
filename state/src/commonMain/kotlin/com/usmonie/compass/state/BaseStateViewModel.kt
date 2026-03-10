@@ -1,7 +1,9 @@
 package com.usmonie.compass.state
 
+import androidx.compose.runtime.Immutable
 import kotlinx.coroutines.CoroutineScope
 
+@Immutable
 public open class BaseStateViewModel<S : State, in A : Action, V : Event, out F : Effect>(
     initialState: S,
     private val stateManager: StateManager<S, V>,
