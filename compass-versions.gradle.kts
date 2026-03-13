@@ -6,11 +6,14 @@
  */
 
 // Load compass versions from properties file
-val compassVersionsFile = rootProject.file("gradle/compass-versions.properties")
+val compassVersionsFile = listOf(
+    rootProject.file("gradle/compass-versions.properties"),
+    rootProject.file("compass-versions.properties"),
+    project.file("compass-versions.properties")
+).firstOrNull { it.exists() }
+
 val compassVersionsProps = java.util.Properties().apply {
-    if (compassVersionsFile.exists()) {
-        load(compassVersionsFile.inputStream())
-    }
+    compassVersionsFile?.inputStream()?.use { load(it) }
 }
 
 // Extension to access compass versions
