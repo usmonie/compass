@@ -1,8 +1,6 @@
 plugins {
-    id("compose")
-
+    id("compass-compose")
     id("maven-publish")
-    // id("signing") // Removed temporarily to fix linter errors, will configure signing later
 }
 
 publishing {
@@ -111,12 +109,8 @@ publishing {
 }
 
 kotlin {
-    setupCompassAndroidLibrary()
-
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.androidx.collections)
-            implementation(libs.kotlinx.serialization.json)
             api(libs.androidx.navigation3.compose)
             implementation(libs.ui.backhandler)
 

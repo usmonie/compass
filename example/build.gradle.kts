@@ -1,9 +1,7 @@
 plugins {
-    id("compose")
+    id("compass-compose")
 }
 kotlin {
-    setupCompassAndroidLibrary()
-
     sourceSets {
         commonMain.dependencies {
             implementation(projects.compass.state)

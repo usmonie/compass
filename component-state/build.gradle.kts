@@ -1,5 +1,5 @@
 plugins {
-    id("compose")
+    id("compass-compose")
     id("maven-publish")
 }
 
@@ -87,8 +87,6 @@ publishing {
 }
 
 kotlin {
-    setupCompassAndroidLibrary()
-
     sourceSets {
         commonMain.dependencies {
             implementation(projects.compass.state)

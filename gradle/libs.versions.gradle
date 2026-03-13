@@ -1,0 +1,10 @@
+ext {
+    compass_agp_version = "8.13.2"
+    compass_kotlin_version = "2.3.10"
+    compass_compose_version = "1.11.0-alpha03"
+    compass_coroutines_version = "1.10.2"
+    compass_serialization_version = "1.10.0"
+    compass_navigation_version = "1.1.0-alpha03"
+    compass_metro_version = "0.11.2"
+    compass_kermit_version = "2.1.0"
+}

@@ -1,5 +1,5 @@
 plugins {
-    id("feature-domain-conventions")
+    id("compass-feature-domain")
     id("maven-publish")
 }
 
@@ -87,12 +87,9 @@ publishing {
 }
 
 kotlin {
-    setupCompassAndroidLibrary()
-
     sourceSets {
         commonMain.dependencies {
             api(libs.androidx.navigation3.compose)
-            implementation(libs.kotlinx.serialization.core)
         }
     }
 }
