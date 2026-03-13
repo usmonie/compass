@@ -15,26 +15,32 @@ val compassVersionsProps = java.util.Properties().apply {
 
 // Extension to access compass versions
 val Project.compassVersions: CompassVersions
-    get() = CompassVersions(compassVersionsProps)
+    get() = CompassVersions(this, compassVersionsProps)
 
-data class CompassVersions(private val properties: java.util.Properties) {
+data class CompassVersions(private val project: Project, private val properties: java.util.Properties) {
+    private fun getProperty(key: String, default: String): String {
+        return project.findProperty(key) as? String
+            ?: properties.getProperty(key)
+            ?: default
+    }
+
     val buildVersion: String
-        get() = properties.getProperty("compass.build.version") ?: "0.2.1"
+        get() = getProperty("compass.build.version", "0.2.1")
 
     val coreVersion: String
-        get() = properties.getProperty("compass.core.version") ?: buildVersion
+        get() = getProperty("compass.core.version", buildVersion)
 
     val stateVersion: String
-        get() = properties.getProperty("compass.state.version") ?: buildVersion
+        get() = getProperty("compass.state.version", buildVersion)
 
     val componentStateVersion: String
-        get() = properties.getProperty("compass.component.state.version") ?: buildVersion
+        get() = getProperty("compass.component.state.version", buildVersion)
 
     val screenStateVersion: String
-        get() = properties.getProperty("compass.screen.state.version") ?: buildVersion
+        get() = getProperty("compass.screen.state.version", buildVersion)
 
     val groupId: String
-        get() = properties.getProperty("compass.group.id") ?: "com.usmonie.compass"
+        get() = getProperty("compass.group.id", "com.usmonie.compass")
 }
 
 // Make versions available to all compass library projects
