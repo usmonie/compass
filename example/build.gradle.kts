@@ -4,9 +4,9 @@ plugins {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.compass.state)
-            implementation(projects.compass.componentState)
-            implementation(projects.compass.screenState)
+            implementation(projects.state)
+            implementation(projects.componentState)
+            implementation(projects.screenState)
             implementation(libs.androidx.navigation3.compose)
         }
 

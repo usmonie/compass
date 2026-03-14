@@ -89,7 +89,7 @@ publishing {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation(projects.compass.state)
+            implementation(projects.state)
         }
     }
 }

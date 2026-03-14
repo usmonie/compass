@@ -10,6 +10,10 @@ fun KotlinMultiplatformExtension.setupCompassAndroidLibrary() {
         namespace = "com.usmonie.compass${project.group}.${project.name.replace("-", ".")}"
         compileSdk = 36
         minSdk = 24
+
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_23)
+        }
     }
 }
 

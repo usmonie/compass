@@ -12,6 +12,7 @@ kotlinxDatetime = "0.7.1"
 kermit = "2.1.0"
 coilCompose = "3.4.0"
 material3 = "1.10.0-alpha05"
+activity-compose = "1.12.4"
 
 [libraries]
 # Kotlin and Coroutines
@@ -28,6 +29,7 @@ kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 # AndroidX and Compose
 androidx-collections = { group = "androidx.collection", name = "collection", version.ref = "androidx-collection" }
 androidx-navigation3-compose = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "navigationCompose" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
 ui-backhandler = { module = "org.jetbrains.compose.ui:ui-backhandler", version.ref = "compose-multiplatform" }
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
 ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-multiplatform" }
@@ -46,10 +48,11 @@ metro-runtime = { module = "dev.zacsweers.metro:runtime", version.ref = "metro" 
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 compose-gradle-plugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
+compose-compiler-gradle-plugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 metro-gradle-plugin = { module = "dev.zacsweers.metro:gradle-plugin", version.ref = "metro" }
 
 [plugins]
-androidLibrary = { id = "com.android.kotlin.multiplatform.library" }
+androidLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

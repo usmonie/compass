@@ -114,8 +114,8 @@ kotlin {
             api(libs.androidx.navigation3.compose)
             implementation(libs.ui.backhandler)
 
-            implementation(projects.compass.componentState)
-            implementation(projects.compass.state)
+            implementation(projects.componentState)
+            implementation(projects.state)
         }
     }
 }

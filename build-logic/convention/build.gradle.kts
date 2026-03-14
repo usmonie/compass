@@ -20,10 +20,12 @@ repositories {
 }
 
 dependencies {
-    compileOnly(libs.android.gradle.plugin)
-    compileOnly(libs.kotlin.gradle.plugin)
-    compileOnly(libs.compose.gradle.plugin)
-    compileOnly(libs.metro.gradle.plugin)
+    implementation(libs.android.gradle.plugin)
+    implementation(libs.kotlin.gradle.plugin)
+    implementation(libs.compose.gradle.plugin)
+    implementation(libs.compose.compiler.gradle.plugin)
+    implementation(libs.metro.gradle.plugin)
+    implementation("org.jetbrains.kotlin:kotlin-serialization:${libs.versions.kotlin.get()}")
 }
 
 gradlePlugin {

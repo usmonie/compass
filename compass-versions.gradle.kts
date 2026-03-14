@@ -47,16 +47,16 @@ data class CompassVersions(private val project: Project, private val properties:
 }
 
 // Make versions available to all compass library projects
-if (project.path.startsWith(":compass:")) {
+allprojects {
     // Set version for compass libraries
-    project.version = project.compassVersions.buildVersion
+    version = compassVersions.buildVersion
 
     // Set specific group ID based on the library
-    project.group = when (project.name) {
-        "core" -> "${project.compassVersions.groupId}.core"
-        "state" -> "${project.compassVersions.groupId}.state"
-        "component-state" -> "${project.compassVersions.groupId}.component.state"
-        "screen-state" -> "${project.compassVersions.groupId}.screen.state"
-        else -> project.compassVersions.groupId
+    group = when (name) {
+        "core" -> "${compassVersions.groupId}.core"
+        "state" -> "${compassVersions.groupId}.state"
+        "component-state" -> "${compassVersions.groupId}.component.state"
+        "screen-state" -> "${compassVersions.groupId}.screen.state"
+        else -> compassVersions.groupId
     }
 }
