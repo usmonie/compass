@@ -1,92 +1,10 @@
 plugins {
     id("compass-feature-domain")
-    id("maven-publish")
+    id("compass-publish")
 }
 
 // Version and group are now set by compass-versions.gradle.kts
-
-publishing {
-    publications {
-        withType<MavenPublication> {
-            pom {
-                name.set("Compass State")
-                description.set("Pure MVI state management library for Kotlin Multiplatform - no UI dependencies")
-                url.set("https://github.com/usmonie/compass/")
-
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
-                    }
-                }
-
-                developers {
-                    developer {
-                        id.set("usmonie")
-                        name.set("Compass Team")
-                        email.set("compass@usmonie.com")
-                    }
-                }
-
-                scm {
-                    connection.set("scm:git:git://github.com/usmonie/compass.git")
-                    developerConnection.set("scm:git:ssh://github.com/usmonie/compass.git")
-                    url.set("https://github.com/usmonie/compass")
-                }
-            }
-        }
-    }
-
-    repositories {
-        mavenLocal()
-
-        // GitLab Maven repository (conditional)
-        if (project.hasProperty("enableGitlabPublish")) {
-            val gitlabProjectId = project.findProperty("gitlabProjectId") as String?
-                ?: System.getenv("GITLAB_PROJECT_ID")
-            val gitlabToken = project.findProperty("gitlabToken") as String?
-                ?: System.getenv("GITLAB_TOKEN")
-            val gitlabUrl = project.findProperty("gitlabUrl") as String?
-                ?: "https://gitlab.coinkeep.com/api/v4/projects/$gitlabProjectId/packages/maven"
-
-            if (gitlabToken != null && gitlabProjectId != null) {
-                maven {
-                    name = "GitLab"
-                    url = uri(gitlabUrl)
-                    credentials(HttpHeaderCredentials::class) {
-                        name = "Private-Token"
-                        value = gitlabToken
-                    }
-                    authentication {
-                        create("header", HttpHeaderAuthentication::class)
-                    }
-                }
-            }
-        }
-        // GitHub Packages repository (conditional)
-        else if (project.hasProperty("enableGithubPublish")) {
-            val githubUsername = project.findProperty("githubUsername")?.toString()
-                ?: System.getenv("PACKAGES_USER")
-                ?: "usmonie"
-            val githubRepository = project.findProperty("githubRepository")?.toString()
-                ?: System.getenv("PACKAGES_REPOSITORY")
-                ?: "compass"
-            val githubToken = project.findProperty("githubToken")?.toString()
-                ?: System.getenv("PACKAGES_TOKEN")
-
-            if (!githubToken.isNullOrEmpty()) {
-                maven {
-                    name = "GitHubPackages"
-                    url = uri("https://maven.pkg.github.com/$githubUsername/$githubRepository")
-                    credentials {
-                        this.username = githubUsername
-                        this.password = githubToken
-                    }
-                }
-            }
-        }
-    }
-}
+// Publishing configuration moved to CompassPublishConventionPlugin
 
 kotlin {
     sourceSets {

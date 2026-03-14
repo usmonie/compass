@@ -5,7 +5,8 @@ compose-multiplatform = "1.11.0-alpha03"
 navigationCompose = "1.1.0-alpha03"
 kotlinxSerializationJson = "1.10.0"
 androidx-collection = "1.5.0"
-mavenPublish = "0.36.0"
+mavenPublish = "0.30.0"
+dokka = "2.0.0"
 coroutines = "1.10.2"
 metro = "0.11.2"
 kotlinxDatetime = "0.7.1"
@@ -50,6 +51,8 @@ kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", v
 compose-gradle-plugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
 compose-compiler-gradle-plugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 metro-gradle-plugin = { module = "dev.zacsweers.metro:gradle-plugin", version.ref = "metro" }
+vanniktech-publish-plugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "mavenPublish" }
+dokka-gradle-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 
 [plugins]
 androidLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
@@ -58,3 +61,4 @@ composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-mu
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 vanniktech-maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }

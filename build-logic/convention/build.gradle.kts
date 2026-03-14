@@ -25,6 +25,8 @@ dependencies {
     implementation(libs.compose.gradle.plugin)
     implementation(libs.compose.compiler.gradle.plugin)
     implementation(libs.metro.gradle.plugin)
+    implementation(libs.vanniktech.publish.plugin)
+    implementation(libs.dokka.gradle.plugin)
     implementation("org.jetbrains.kotlin:kotlin-serialization:${libs.versions.kotlin.get()}")
 }
 
@@ -41,6 +43,10 @@ gradlePlugin {
         register("compassFeatureDomain") {
             id = "compass-feature-domain"
             implementationClass = "CompassFeatureDomainConventionPlugin"
+        }
+        register("compassPublish") {
+            id = "compass-publish"
+            implementationClass = "CompassPublishConventionPlugin"
         }
     }
 }
