@@ -12,7 +12,7 @@ class CompassBaseKmpConventionPlugin : Plugin<Project> {
 
             val kotlin = extensions.getByType(KotlinMultiplatformExtension::class.java)
             kotlin.apply {
-                jvmToolchain(22)
+                jvmToolchain(23)
                 explicitApi()
 
                 setupCompassAndroidLibrary()
