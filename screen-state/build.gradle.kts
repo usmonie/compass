@@ -66,12 +66,9 @@ publishing {
         }
         // GitHub Packages repository (conditional and exclusive when enabled)  
         else if (project.hasProperty("enableGithubPublish")) {
-            val githubUsername = project.findProperty("githubUsername") as String?
-                ?: System.getenv("PACKAGES_USER") ?: "usmonie"
-            val githubRepository = project.findProperty("githubRepository") as String?
-                ?: System.getenv("PACKAGES_REPOSITORY") ?: "compass"
-            val githubToken = project.findProperty("githubToken") as String?
-                ?: System.getenv("PACKAGES_TOKEN")
+            val githubUsername = System.getenv("PACKAGES_USER") ?: "usmonie"
+            val githubRepository = System.getenv("PACKAGES_REPOSITORY") ?: "compass"
+            val githubToken = System.getenv("PACKAGES_TOKEN")
 
             if (githubToken != null) {
                 maven {
@@ -95,13 +92,17 @@ publishing {
                         System.getenv("OSSRH_PASSWORD") ?: findProperty("ossrhPassword") as String?
                 }
             }
-            maven {
-                name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/usmonie/compass")
-                credentials {
-                    username =
-                        System.getenv("PACKAGES_USER") ?: findProperty("gpr.user") as String?
-                    password = System.getenv("PACKAGES_TOKEN") ?: findProperty("gpr.key") as String?
+            val packagesUser = System.getenv("PACKAGES_USER") ?: findProperty("gpr.user") as String?
+            val packagesToken = System.getenv("PACKAGES_TOKEN") ?: findProperty("gpr.key") as String?
+
+            if (packagesUser != null && packagesToken != null) {
+                maven {
+                    name = "GitHubPackages"
+                    url = uri("https://maven.pkg.github.com/usmonie/compass")
+                    credentials {
+                        username = packagesUser
+                        password = packagesToken
+                    }
                 }
             }
         }

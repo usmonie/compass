@@ -45,7 +45,8 @@ jobs:
         run: |
           ./gradlew publishAllPublicationsToGitHubPackagesRepository \
             -PenableGithubPublish=true \
-            -PgithubUsername=${{ github.actor }} \
-            -PgithubRepository=compass \
-            -PgithubToken=${{ secrets.GITHUB_TOKEN }} \
             ${{ steps.get_version.outputs.version != '' && format('-Pcompass.build.version={0}', steps.get_version.outputs.version) || '' }}
+        env:
+          PACKAGES_USER: ${{ github.actor }}
+          PACKAGES_REPOSITORY: compass
+          PACKAGES_TOKEN: ${{ secrets.GITHUB_TOKEN }}

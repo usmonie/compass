@@ -65,12 +65,9 @@ publishing {
         }
         // GitHub Packages repository (conditional)
         else if (project.hasProperty("enableGithubPublish")) {
-            val githubUsername = project.findProperty("githubUsername") as String?
-                ?: System.getenv("PACKAGES_USER") ?: "usmonie"
-            val githubRepository = project.findProperty("githubRepository") as String?
-                ?: System.getenv("PACKAGES_REPOSITORY") ?: "compass"
-            val githubToken = project.findProperty("githubToken") as String?
-                ?: System.getenv("PACKAGES_TOKEN")
+            val githubUsername = System.getenv("PACKAGES_USER") ?: "usmonie"
+            val githubRepository = System.getenv("PACKAGES_REPOSITORY") ?: "compass"
+            val githubToken = System.getenv("PACKAGES_TOKEN")
 
             if (githubToken != null) {
                 maven {
