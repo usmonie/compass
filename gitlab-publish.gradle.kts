@@ -1,7 +1,3 @@
-import android.R.attr.configure
-import android.R.attr.name
-import android.R.attr.value
-
 // GitLab Maven publishing configuration
 // Apply this to build.gradle.kts with: apply(from = "gitlab-publish.gradle.kts")
 

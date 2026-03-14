@@ -66,17 +66,22 @@ publishing {
         }
         // GitHub Packages repository (conditional and exclusive when enabled)  
         else if (project.hasProperty("enableGithubPublish")) {
-            val githubUsername = System.getenv("PACKAGES_USER") ?: "usmonie"
-            val githubRepository = System.getenv("PACKAGES_REPOSITORY") ?: "compass"
-            val githubToken = System.getenv("PACKAGES_TOKEN")
+            val githubUsername = project.findProperty("githubUsername")?.toString()
+                ?: System.getenv("PACKAGES_USER")
+                ?: "usmonie"
+            val githubRepository = project.findProperty("githubRepository")?.toString()
+                ?: System.getenv("PACKAGES_REPOSITORY")
+                ?: "compass"
+            val githubToken = project.findProperty("githubToken")?.toString()
+                ?: System.getenv("PACKAGES_TOKEN")
 
-            if (githubToken != null) {
+            if (!githubToken.isNullOrEmpty()) {
                 maven {
                     name = "GitHubPackages"
                     url = uri("https://maven.pkg.github.com/$githubUsername/$githubRepository")
                     credentials {
-                        username = githubUsername
-                        password = githubToken
+                        this.username = githubUsername
+                        this.password = githubToken
                     }
                 }
             }
@@ -92,16 +97,20 @@ publishing {
                         System.getenv("OSSRH_PASSWORD") ?: findProperty("ossrhPassword") as String?
                 }
             }
-            val packagesUser = System.getenv("PACKAGES_USER") ?: findProperty("gpr.user") as String?
-            val packagesToken = System.getenv("PACKAGES_TOKEN") ?: findProperty("gpr.key") as String?
+            val packagesUser = project.findProperty("githubUsername")?.toString()
+                ?: System.getenv("PACKAGES_USER")
+                ?: findProperty("gpr.user")?.toString()
+            val packagesToken = project.findProperty("githubToken")?.toString()
+                ?: System.getenv("PACKAGES_TOKEN")
+                ?: findProperty("gpr.key")?.toString()
 
-            if (packagesUser != null && packagesToken != null) {
+            if (!packagesUser.isNullOrEmpty() && !packagesToken.isNullOrEmpty()) {
                 maven {
                     name = "GitHubPackages"
                     url = uri("https://maven.pkg.github.com/usmonie/compass")
                     credentials {
-                        username = packagesUser
-                        password = packagesToken
+                        this.username = packagesUser
+                        this.password = packagesToken
                     }
                 }
             }
