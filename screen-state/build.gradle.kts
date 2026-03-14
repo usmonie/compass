@@ -67,11 +67,11 @@ publishing {
         // GitHub Packages repository (conditional and exclusive when enabled)  
         else if (project.hasProperty("enableGithubPublish")) {
             val githubUsername = project.findProperty("githubUsername") as String?
-                ?: System.getenv("GITHUB_USERNAME") ?: "usmonie"
+                ?: System.getenv("PACKAGES_USER") ?: "usmonie"
             val githubRepository = project.findProperty("githubRepository") as String?
-                ?: System.getenv("GITHUB_REPOSITORY") ?: "compass"
+                ?: System.getenv("PACKAGES_REPOSITORY") ?: "compass"
             val githubToken = project.findProperty("githubToken") as String?
-                ?: System.getenv("GITHUB_TOKEN")
+                ?: System.getenv("PACKAGES_TOKEN")
 
             if (githubToken != null) {
                 maven {
@@ -100,8 +100,8 @@ publishing {
                 url = uri("https://maven.pkg.github.com/usmonie/compass")
                 credentials {
                     username =
-                        System.getenv("GITHUB_USERNAME") ?: findProperty("gpr.user") as String?
-                    password = System.getenv("GITHUB_TOKEN") ?: findProperty("gpr.key") as String?
+                        System.getenv("PACKAGES_USER") ?: findProperty("gpr.user") as String?
+                    password = System.getenv("PACKAGES_TOKEN") ?: findProperty("gpr.key") as String?
                 }
             }
         }
