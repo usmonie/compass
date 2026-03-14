@@ -12,7 +12,7 @@ fun KotlinMultiplatformExtension.setupCompassAndroidLibrary() {
         minSdk = 24
 
         compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_23)
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_22)
         }
     }
 }
