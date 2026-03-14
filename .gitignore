@@ -130,9 +130,14 @@ misc.xml
 deploymentTargetDropDown.xml
 render.experimental.xml
 
-# Keystore files
+# Keystore and PGP files
 *.jks
 *.keystore
+*.gpg
+*.asc
+public_*.asc
+secret_*.gpg
+secret_*.asc
 
 # Google Services (e.g. APIs or Firebase)
 google-services.json
