@@ -142,6 +142,7 @@ public class StateComponentDefinition<P, S : State, A : Action, V : Event, F : E
         StateContent(
             viewModel = viewModel,
             onEffect = customOnEffect ?: onEffect,
+            initialStateProvider = customInitialStateProvider,
             content = { state, onAction -> content(params, state, onAction) },
         )
     }
