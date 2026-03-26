@@ -86,6 +86,17 @@ public abstract class StateViewModel<S : State, in A : Action, V : Event, out F 
     public val state: StateFlow<S>
         field = MutableStateFlow(initialState)
 
+    /**
+     * Updates the current state of the ViewModel.
+     * This method can be used to set a specific state externally,
+     * though it should be used with caution as it bypasses the normal MVI flow.
+     *
+     * @param newState The new state to emit
+     */
+    public fun updateState(newState: S) {
+        state.value = newState
+    }
+
     private val _effect = Channel<F>()
 
     /**

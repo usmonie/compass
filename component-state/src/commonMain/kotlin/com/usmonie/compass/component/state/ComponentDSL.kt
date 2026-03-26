@@ -90,16 +90,18 @@ public class StateComponentBuilder<P, S : State, A : Action, V : Event, F : Effe
     }
 
     public fun build(): StateComponentDefinition<P, S, A, V, F> {
+        val vm = viewModel ?: createStateViewModel(
+            initialState = requireNotNull(initialStateProvider) { "Initial state provider must be provided" }(),
+            processAction = requireNotNull(processAction) { "Action processor must be provided" },
+            handleEvent = requireNotNull(handleEvent) { "Event handler must be provided" },
+            reduce = requireNotNull(reduce) { "State reducer must be provided" },
+            init = init ?: {},
+        )
         return StateComponentDefinition(
-            viewModel = viewModel ?: createStateViewModel(
-                initialState = requireNotNull(initialStateProvider) { "Initial state provider must be provided" }(),
-                processAction = requireNotNull(processAction) { "Action processor must be provided" },
-                handleEvent = requireNotNull(handleEvent) { "Event handler must be provided" },
-                reduce = requireNotNull(reduce) { "State reducer must be provided" },
-                init = init ?: {},
-            ),
+            viewModel = vm,
             content = requireNotNull(content) { "Content composable must be provided" },
             onEffect = onEffect ?: { _, _ -> },
+            initialStateProvider = initialStateProvider,
         )
     }
 }
@@ -117,6 +119,7 @@ public class StateComponentDefinition<P, S : State, A : Action, V : Event, F : E
     private val viewModel: StateViewModel<S, A, V, F>,
     private val content: @Composable (P, S, (A) -> Unit) -> Unit,
     private val onEffect: @Composable (S, F?) -> Unit,
+    private val initialStateProvider: (() -> S)? = null,
 ): ComponentDefinition<P> {
     /**
      * Creates a Composable component instance with lazy state initialization
@@ -126,6 +129,7 @@ public class StateComponentDefinition<P, S : State, A : Action, V : Event, F : E
         StateContent(
             viewModel = viewModel,
             onEffect = onEffect,
+            initialStateProvider = initialStateProvider,
             content = { state, onAction -> content(params, state, onAction) },
         )
     }

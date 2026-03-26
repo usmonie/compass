@@ -49,9 +49,16 @@ public inline fun <S : State, A : Action, V : Event, F : Effect> SimpleStateCont
 @Composable
 public inline fun <S : State, A : Action, V : Event, F : Effect> StateContent(
     viewModel: StateViewModel<S, A, V, F>,
+    noinline initialStateProvider: (() -> S)? = null,
     crossinline onEffect: @Composable (S, F?) -> Unit = { _, _ -> },
     crossinline content: @Composable (S, (A) -> Unit) -> Unit,
 ) {
+    if (initialStateProvider != null) {
+        remember(viewModel) {
+            viewModel.updateState(initialStateProvider())
+        }
+    }
+
     val state by viewModel.observeState()
     val effect by viewModel.observeEffect()
     onEffect(state, effect)
