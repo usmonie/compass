@@ -1,6 +1,5 @@
-package com.usmonie.compass.example// state/ProfileState.kt
+package com.usmonie.compass.example
 
-import User
 import com.usmonie.compass.state.ContentState
 import com.usmonie.compass.state.State
 

@@ -7,6 +7,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.7] - 2024-03-22
+
+### Fixed
+
+- **Navigation State Reset**: Fixed a bug where returning to a screen would reset its state to initial. This was caused by redundant `initialStateProvider` calls in `StateScreenDestination`.
+- **Saveable State Consistency**: Fixed a mismatch between keys used to store and remove UI state in `SaveableStateHolder`. Now using `ScreenId` instances consistently as keys.
+
+## [0.3.6] - 2024-03-22
+
+### Enhanced
+
+- **Automated Cleanup**: `CompassSaveableState` now accepts an optional `backStack` parameter to automatically sync and clean up both `ViewModelStore` and `SaveableStateHolder` when screens are removed from navigation.
+- **Improved Store Sync**: `ViewModelStore.sync` now supports an `onRemoved` callback for secondary cleanup tasks (like clearing UI state).
+
+## [0.3.5] - 2024-03-22
+
+### Refactored
+
+- Extracted common screen rendering logic into `SaveableScreenContent` helper function in `ScreenDSL.kt`.
+- Cleaned up duplicate code across all `EntryProviderScope` extension functions.
+
+## [0.3.4] - 2024-03-22
+
+### Added
+
+- **State Preservation**: Introduced `ViewModelStore` to persist ViewModels across navigation transitions.
+- **UI State Preservation**: Added `SaveableStateHolder` integration via `CompassSaveableState` and `LocalSaveableStateHolder`.
+- **Screen Lifecycle**: `ScreenDestination` now implements `ViewModel`, allowing it to be managed by `ViewModelStore` and participate in cleanup.
+
+### Enhanced
+
+- Updated `ScreenDSL` entries (`stateEntry`, `entry`, etc.) to automatically use `ViewModelStore` and `SaveableStateHolder` if available.
+- Added `ViewModelStore.sync(activeKeys)` helper to easily manage memory leaks based on the current backstack.
+
+## [0.3.3] - 2024-03-21
+
+### Optimized
+
+- Added `remember` for screen destinations in `ScreenDSL.kt` to prevent unnecessary re-creations.
+- Improved performance and stability of navigation entries.
+
+### Fixed
+
+- Added `initialStateProvider` to `StateScreenDestination` for consistency with components.
+- Fixed potential state synchronization issues in nested navigation.
+
 ## [0.3.2] - 2024-03-20
 
 ### Fixed

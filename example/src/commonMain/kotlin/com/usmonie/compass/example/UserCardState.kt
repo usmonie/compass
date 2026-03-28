@@ -1,9 +1,12 @@
-package com.usmonie.compass.example// ui/components/UserCardComponent.kt
+package com.usmonie.compass.example
 
-import User
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.runtime.Composable
 import com.usmonie.compass.component.state.stateComponent
-import com.usmonie.compass.state.*
+import com.usmonie.compass.state.Action
+import com.usmonie.compass.state.Effect
+import com.usmonie.compass.state.Event
+import com.usmonie.compass.state.State
 
 internal data class UserCardState(val user: User) : State
 internal object UserCardAction : Action

@@ -2,6 +2,12 @@ package com.usmonie.compass.screen.state
 
 import androidx.collection.ScatterMap
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.SaveableStateHolder
+import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.navigation3.runtime.EntryProviderScope
 import com.usmonie.compass.screen.state.navigation.ScreenDestination
 import com.usmonie.compass.screen.state.navigation.ScreenId
@@ -13,7 +19,49 @@ import com.usmonie.compass.state.EventHandler
 import com.usmonie.compass.state.State
 import com.usmonie.compass.state.StateManager
 import com.usmonie.compass.state.StateViewModel
+import com.usmonie.compass.state.ViewModelStore
 import kotlin.jvm.JvmSuppressWildcards
+
+public val LocalSaveableStateHolder: ProvidableCompositionLocal<SaveableStateHolder?> = staticCompositionLocalOf<SaveableStateHolder?> { null }
+
+@Composable
+public fun CompassSaveableState(
+    backStack: List<Any>? = null,
+    content: @Composable () -> Unit
+) {
+    val holder = rememberSaveableStateHolder()
+    
+    if (backStack != null) {
+        remember(backStack) {
+            ViewModelStore.sync(backStack) { removedKey ->
+                holder.removeState(removedKey.hashCode())
+            }
+        }
+    }
+
+    CompositionLocalProvider(LocalSaveableStateHolder provides holder) {
+        content()
+    }
+}
+
+@Composable
+@PublishedApi
+internal fun <K : ScreenId, D : ScreenDestination<K>> SaveableScreenContent(
+    screenId: K,
+    screenDestination: (K) -> D
+) {
+    val destination = remember(screenId) {
+        ViewModelStore.getOrPut(screenId) { screenDestination(screenId) }
+    }
+    val holder = LocalSaveableStateHolder.current
+    if (holder != null) {
+        holder.SaveableStateProvider(screenId.hashCode()) {
+            destination.Content()
+        }
+    } else {
+        destination.Content()
+    }
+}
 
 /**
  * DSL функция для создания state-managed screen
@@ -133,9 +181,8 @@ public fun <K : ScreenId, S : State, A : Action, V : Event, F : Effect> EntryPro
     entry(
         key = key,
         metadata = metadata,
-    ) {
-        val screenDestination = screenDestination(it)
-        screenDestination.Content()
+    ) { screenId ->
+        SaveableScreenContent(screenId, screenDestination)
     }
 }
 
@@ -147,9 +194,8 @@ public fun <K : ScreenId> EntryProviderScope<K>.entry(
     entry(
         key = key,
         metadata = metadata,
-    ) {
-        val screenDestination = screenDestination(it)
-        screenDestination.Content()
+    ) { screenId ->
+        SaveableScreenContent(screenId, screenDestination)
     }
 }
 
@@ -159,9 +205,8 @@ public inline fun <reified K : ScreenId, S : State, A : Action, V : Event, F : E
 ) {
     entry<K>(
         metadata = metadata,
-    ) {
-        val screenDestination = screenDestination(it)
-        screenDestination.Content()
+    ) { screenId ->
+        SaveableScreenContent(screenId, screenDestination)
     }
 }
 
@@ -173,9 +218,8 @@ public inline fun <reified K : ScreenId> EntryProviderScope<ScreenId>.entry(
     entry<K>(
         clazzContentKey = contentKey,
         metadata = metadata,
-    ) {
-        val screenDestination = screenDestination(it)
-        screenDestination.Content()
+    ) { screenId ->
+        SaveableScreenContent(screenId, screenDestination)
     }
 }
 
@@ -188,9 +232,8 @@ public inline fun <reified K : ScreenId> EntryProviderScope<ScreenId>.screen(
     entry<K>(
         clazzContentKey = contentKey,
         metadata = metadata,
-    ) {
-        val screenDestination = screenDestination(it)
-        screenDestination.Content()
+    ) { screenId ->
+        SaveableScreenContent(screenId, screenDestination)
     }
 }
 
@@ -200,8 +243,7 @@ public inline fun <reified K : ScreenId, S : State> EntryProviderScope<ScreenId>
 ) {
     entry<K>(
         metadata = metadata,
-    ) {
-        val screenDestination = screenDestination(it)
-        screenDestination.Content()
+    ) { screenId ->
+        SaveableScreenContent(screenId, screenDestination)
     }
 }

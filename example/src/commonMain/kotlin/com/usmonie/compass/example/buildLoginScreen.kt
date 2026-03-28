@@ -1,11 +1,8 @@
 package com.usmonie.compass.example
 
-import LoginAction
-import LoginEffect
-import LoginEvent
-import LoginState
-import User
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
@@ -19,22 +16,34 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.usmonie.compass.screen.state.StateScreenDestination
 import com.usmonie.compass.screen.state.stateScreen
+import com.usmonie.compass.state.SubscriptionKey
 
-internal fun buildLoginScreen(onLoginSuccess: (User) -> Unit): StateScreenDestination<LoginScreen, LoginState, LoginAction, LoginEvent, LoginEffect> {
+internal fun buildLoginScreen(
+    onBack: () -> Unit,
+    onLoginSuccess: (User) -> Unit
+): StateScreenDestination<LoginScreen, LoginState, LoginAction, LoginEvent, LoginEffect> {
     return stateScreen(
         LoginScreen,
         storeInBackStack = true
     ) {
         initialState(LoginState())
-        processAction { action, state, _, _ ->
+        processAction { action, state, emit, launchFlow ->
             when (action) {
-                is LoginAction.EnterEmail -> LoginEvent.EmailChanged(action.email)
-                is LoginAction.EnterPassword -> LoginEvent.PasswordChanged(action.password)
+                is LoginAction.EnterEmail -> emit(LoginEvent.EmailChanged(action.email))
+                is LoginAction.EnterPassword -> emit(LoginEvent.PasswordChanged(action.password))
                 LoginAction.Submit -> {
                     if (state.email.isEmpty() || state.password.isEmpty()) {
-                        LoginEvent.LoginFailed(IllegalArgumentException("Fill all fields"))
+                        emit(LoginEvent.LoginFailed(IllegalArgumentException("Fill all fields")))
                     } else {
-                        LoginEvent.LoginSuccess(User("", " Usman"))
+                        emit(LoginEvent.LoadingStarted)
+                        launchFlow(SubscriptionKey("login")) {
+                            try {
+                                val user = ApiClient.fetchUser(state.email)
+                                emit(LoginEvent.LoginSuccess(user))
+                            } catch (e: Exception) {
+                                emit(LoginEvent.LoginFailed(e))
+                            }
+                        }
                     }
                 }
             }
@@ -59,9 +68,8 @@ internal fun buildLoginScreen(onLoginSuccess: (User) -> Unit): StateScreenDestin
             }
         }
         content { state, sendAction ->
-            Scaffold {
-
-                Column(modifier = Modifier.padding(16.dp)) {
+            Scaffold { paddingValues ->
+                Column(modifier = Modifier.padding(paddingValues).padding(16.dp)) {
                     OutlinedTextField(
                         value = state.email,
                         onValueChange = { sendAction(LoginAction.EnterEmail(it)) },
@@ -82,6 +90,15 @@ internal fun buildLoginScreen(onLoginSuccess: (User) -> Unit): StateScreenDestin
                     ) {
                         if (state.isLoading) CircularProgressIndicator(Modifier.size(16.dp))
                         else Text("Login")
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Button(
+                        onClick = { onBack() },
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) {
+                        Text("Back (Manual)")
                     }
                 }
             }

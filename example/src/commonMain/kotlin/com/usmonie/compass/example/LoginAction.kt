@@ -1,3 +1,5 @@
+package com.usmonie.compass.example
+
 import com.usmonie.compass.state.Action
 import com.usmonie.compass.state.Effect
 import com.usmonie.compass.state.Event

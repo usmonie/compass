@@ -48,5 +48,9 @@ gradlePlugin {
             id = "compass-publish"
             implementationClass = "CompassPublishConventionPlugin"
         }
+        register("compassExampleApp") {
+            id = "compass-example-app"
+            implementationClass = "CompassExampleAppConventionPlugin"
+        }
     }
 }

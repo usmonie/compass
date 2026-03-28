@@ -96,18 +96,19 @@ public class StateScreenBuilder<K : ScreenId, S : State, A : Action, V : Event, 
         screenId: K,
         storeInBackStack: Boolean,
     ): StateScreenDestination<K, S, A, V, F> {
+        val vm = createStateViewModel(
+            initialState = requireNotNull(initialState) { "Initial state must be provided" },
+            processAction = requireNotNull(processAction) { "Action processor must be provided" },
+            handleEvent = requireNotNull(handleEvent) { "Event handler must be provided" },
+            reduce = requireNotNull(reduce) { "State reducer must be provided" },
+            init = init ?: {},
+        )
         return StateScreenDestination(
             id = screenId,
             storeInBackStack = storeInBackStack,
-            viewModel = createStateViewModel(
-                initialState = requireNotNull(initialState) { "Initial state must be provided" },
-                processAction = requireNotNull(processAction) { "Action processor must be provided" },
-                handleEvent = requireNotNull(handleEvent) { "Event handler must be provided" },
-                reduce = requireNotNull(reduce) { "State reducer must be provided" },
-                init = init ?: {},
-            ),
+            viewModel = vm,
             content = requireNotNull(content) { "Content composable must be provided" },
-            onEffect = onEffect ?: { _, _ -> }
+            onEffect = onEffect ?: { _, _ -> },
         )
     }
 }
@@ -131,6 +132,10 @@ public class StateScreenDestination<K : ScreenId, S : State, A : Action, V : Eve
             onEffect = onEffect,
             content = content
         )
+    }
+
+    override fun onDispose() {
+        viewModel.onDispose()
     }
 }
 

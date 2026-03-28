@@ -1,6 +1,7 @@
 plugins {
-    id("compass-compose")
+    id("compass-example-app")
 }
+
 kotlin {
     sourceSets {
         commonMain.dependencies {
@@ -9,10 +10,5 @@ kotlin {
             implementation(projects.screenState)
             implementation(libs.androidx.navigation3.compose)
         }
-
-        androidMain.dependencies {
-            implementation(libs.androidx.activity.compose)
-        }
     }
 }
-

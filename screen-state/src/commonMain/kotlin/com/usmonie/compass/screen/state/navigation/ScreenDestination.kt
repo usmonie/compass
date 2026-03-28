@@ -2,6 +2,7 @@ package com.usmonie.compass.screen.state.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import com.usmonie.compass.state.ViewModel
 import kotlinx.serialization.Serializable
 
 /**
@@ -10,13 +11,15 @@ import kotlinx.serialization.Serializable
  */
 @Immutable
 @Serializable
-public abstract class ScreenDestination<T: ScreenId>(
+public abstract class ScreenDestination<T : ScreenId>(
     public val key: T,
     public val storeInBackStack: Boolean = true
-)  {
+) : ViewModel {
     /**
      * The content to be displayed
      */
     @Composable
     public abstract fun Content()
+
+    override fun onDispose() {}
 }
