@@ -1,19 +1,17 @@
 [versions]
 agp = "8.13.2"
 kotlin = "2.3.10"
-compose-multiplatform = "1.11.0-alpha03"
-navigationCompose = "1.1.0-alpha03"
+compose-multiplatform = "1.11.0-beta01"
+navigationCompose = "1.1.0-beta01"
 kotlinxSerializationJson = "1.10.0"
-androidx-collection = "1.5.0"
+androidx-collection = "1.6.0"
 mavenPublish = "0.30.0"
-dokka = "2.0.0"
+dokka = "2.2.0"
 coroutines = "1.10.2"
-metro = "0.11.2"
 kotlinxDatetime = "0.7.1"
-kermit = "2.1.0"
 coilCompose = "3.4.0"
 material3 = "1.10.0-alpha05"
-activity-compose = "1.12.4"
+activity-compose = "1.13.0"
 
 [libraries]
 # Kotlin and Coroutines
@@ -25,7 +23,6 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerializationJson" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
-kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 
 # AndroidX and Compose
 androidx-collections = { group = "androidx.collection", name = "collection", version.ref = "androidx-collection" }
@@ -42,15 +39,11 @@ components-resources = { module = "org.jetbrains.compose.components:components-r
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 desktop = { module = "org.jetbrains.compose.desktop:desktop", version.ref = "compose-multiplatform" }
 
-# DI
-metro-runtime = { module = "dev.zacsweers.metro:runtime", version.ref = "metro" }
-
 # Build Logic Dependencies
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 compose-gradle-plugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
 compose-compiler-gradle-plugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
-metro-gradle-plugin = { module = "dev.zacsweers.metro:gradle-plugin", version.ref = "metro" }
 vanniktech-publish-plugin = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "mavenPublish" }
 dokka-gradle-plugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 

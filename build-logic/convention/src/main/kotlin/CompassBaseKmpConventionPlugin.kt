@@ -1,8 +1,11 @@
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.problems.internal.GradleCoreProblemGroup.versionCatalog
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 class CompassBaseKmpConventionPlugin : Plugin<Project> {
+    @OptIn(ExperimentalWasmDsl::class)
     override fun apply(target: Project) {
         with(target) {
             with(pluginManager) {
@@ -20,6 +23,9 @@ class CompassBaseKmpConventionPlugin : Plugin<Project> {
                 jvm()
                 iosArm64()
                 iosSimulatorArm64()
+                wasmJs {
+                    browser()
+                }
 
                 targets.all {
                     compilations.all {

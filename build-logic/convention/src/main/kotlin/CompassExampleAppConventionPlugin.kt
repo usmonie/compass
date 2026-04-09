@@ -51,9 +51,7 @@ class CompassExampleAppConventionPlugin : Plugin<Project> {
                         implementation(versionCatalog.findLibrary("components-resources").get())
                         implementation(versionCatalog.findLibrary("coil-compose").get())
                         implementation(versionCatalog.findLibrary("ui-backhandler").get())
-                        implementation(versionCatalog.findLibrary("metro-runtime").get())
                         implementation(versionCatalog.findLibrary("kotlinx-serialization-json").get())
-                        implementation(versionCatalog.findLibrary("kermit").get())
                         implementation(versionCatalog.findLibrary("coroutines-core").get())
                         implementation(versionCatalog.findLibrary("androidx-collections").get())
                     }

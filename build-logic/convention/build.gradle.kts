@@ -24,7 +24,6 @@ dependencies {
     implementation(libs.kotlin.gradle.plugin)
     implementation(libs.compose.gradle.plugin)
     implementation(libs.compose.compiler.gradle.plugin)
-    implementation(libs.metro.gradle.plugin)
     implementation(libs.vanniktech.publish.plugin)
     implementation(libs.dokka.gradle.plugin)
     implementation("org.jetbrains.kotlin:kotlin-serialization:${libs.versions.kotlin.get()}")
