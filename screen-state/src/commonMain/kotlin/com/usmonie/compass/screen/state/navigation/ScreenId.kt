@@ -11,23 +11,6 @@ public open class ScreenId(
     public val id: String,
     public open val mode: Mode = Mode.STANDARD,
 ) : Extra, NavKey {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other == null || this::class != other::class) return false
-
-        other as ScreenId
-
-        if (id != other.id) return false
-        if (mode != other.mode) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = id.hashCode()
-        result = 31 * result + mode.hashCode()
-        return result
-    }
 }
 
 @Serializable

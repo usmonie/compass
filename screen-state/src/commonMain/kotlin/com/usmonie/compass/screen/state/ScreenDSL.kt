@@ -30,10 +30,11 @@ public fun CompassSaveableState(
     content: @Composable () -> Unit
 ) {
     val holder = rememberSaveableStateHolder()
-    
+
     if (backStack != null) {
-        remember(backStack) {
-            ViewModelStore.sync(backStack) { removedKey ->
+        val keys = backStack.toList()
+        remember(keys) {
+            ViewModelStore.sync(keys) { removedKey ->
                 holder.removeState(removedKey.hashCode())
             }
         }
@@ -50,9 +51,8 @@ internal fun <K : ScreenId, D : ScreenDestination<K>> SaveableScreenContent(
     screenId: K,
     screenDestination: (K) -> D
 ) {
-    val destination = remember(screenId) {
-        ViewModelStore.getOrPut(screenId) { screenDestination(screenId) }
-    }
+    val destination = ViewModelStore.getOrPut(screenId) { screenDestination(screenId) }
+
     val holder = LocalSaveableStateHolder.current
     if (holder != null) {
         holder.SaveableStateProvider(screenId.hashCode()) {
