@@ -16,6 +16,13 @@ fun KotlinMultiplatformExtension.setupCompassAndroidLibrary() {
         minSdk = 24
 
         compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
+
+        optimization {
+            consumerKeepRules.apply {
+                publish = true
+                file("consumer-proguard-rules.pro")
+            }
+        }
     }
 }
 
@@ -34,7 +41,10 @@ fun Project.setupCompassAndroidApplication() {
 
         buildTypes {
             getByName("release") {
-                isMinifyEnabled = false
+                isMinifyEnabled = true
+                proguardFiles(
+                    "proguard-rules.pro"
+                )
             }
         }
 
