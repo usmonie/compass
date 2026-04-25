@@ -15,12 +15,16 @@ class CompassBaseKmpConventionPlugin : Plugin<Project> {
 
             val kotlin = extensions.getByType(KotlinMultiplatformExtension::class.java)
             kotlin.apply {
-                jvmToolchain(23)
+                jvmToolchain(21)
                 explicitApi()
 
                 setupCompassAndroidLibrary()
 
-                jvm()
+                jvm {
+                    compilerOptions {
+                        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+                    }
+                }
                 iosArm64()
                 iosSimulatorArm64()
                 wasmJs {

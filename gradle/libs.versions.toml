@@ -1,5 +1,5 @@
 [versions]
-agp = "8.13.2"
+agp = "9.2.0"
 kotlin = "2.3.20"
 compose-multiplatform = "1.11.0-beta02"
 navigationCompose = "1.1.0-rc01"

@@ -23,4 +23,4 @@ dependencyResolutionManagement {
 include(":state")
 include(":component-state")
 include(":screen-state")
-include(":example")
+//include(":example")

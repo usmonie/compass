@@ -9,15 +9,15 @@ class CompassExampleAppConventionPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         with(project) {
             pluginManager.apply {
-                apply("com.android.application")
                 apply("org.jetbrains.kotlin.multiplatform")
+                apply("com.android.application")
                 apply("org.jetbrains.compose")
                 apply("org.jetbrains.kotlin.plugin.compose")
                 apply("org.jetbrains.kotlin.plugin.serialization")
             }
 
             extensions.configure<KotlinMultiplatformExtension> {
-                jvmToolchain(23)
+                jvmToolchain(21)
                 androidTarget()
 
                 targets.all {
