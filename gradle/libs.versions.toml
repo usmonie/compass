@@ -1,8 +1,8 @@
 [versions]
 agp = "9.2.0"
 kotlin = "2.3.20"
-compose-multiplatform = "1.11.0-beta02"
-navigationCompose = "1.1.0-rc01"
+compose-multiplatform = "1.11.0-beta03"
+navigationCompose = "1.1.0"
 kotlinxSerializationJson = "1.11.0"
 androidx-collection = "1.6.0"
 mavenPublish = "0.30.0"
