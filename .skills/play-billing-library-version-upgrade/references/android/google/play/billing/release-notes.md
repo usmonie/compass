@@ -901,7 +901,7 @@ private fun startPurchase(skuId: String) {
 
 ```java
 private BillingClient mBillingClient;
-private Map<String, SkuDetails> mSkuDetailsMap = new HashMap<>();
+private final Map<String, SkuDetails> mSkuDetailsMap = new HashMap<>();
 
 private void querySkuDetails() {
     SkuDetailsParams.Builder skuDetailsParamsBuilder
