@@ -14,7 +14,9 @@ class CompassFeatureDomainConventionPlugin : Plugin<Project> {
             extensions.configure<KotlinMultiplatformExtension> {
                 sourceSets.apply {
                     commonMain.dependencies {
-                        implementation(versionCatalog.findLibrary("kotlinx-serialization-json").get())
+                        implementation(
+                            versionCatalog.findLibrary("kotlinx-serialization-json").get()
+                        )
                     }
                 }
             }

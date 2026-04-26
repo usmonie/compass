@@ -29,14 +29,14 @@ public object ViewModelStore {
         vms.values.forEach { it.onDispose() }
         vms.clear()
     }
-    
+
     /**
      * Clears ViewModels that are no longer present in the [activeKeys] list.
      * Use this when the backstack changes to prevent memory leaks.
      */
     public fun sync(activeKeys: List<Any>, onRemoved: (Any) -> Unit = {}) {
         val keysToRemove = vms.keys.filter { it !in activeKeys }
-        keysToRemove.forEach { 
+        keysToRemove.forEach {
             remove(it)
             onRemoved(it)
         }

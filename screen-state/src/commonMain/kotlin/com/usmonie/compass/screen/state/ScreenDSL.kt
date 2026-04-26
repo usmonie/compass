@@ -22,7 +22,8 @@ import com.usmonie.compass.state.StateViewModel
 import com.usmonie.compass.state.ViewModelStore
 import kotlin.jvm.JvmSuppressWildcards
 
-public val LocalSaveableStateHolder: ProvidableCompositionLocal<SaveableStateHolder?> = staticCompositionLocalOf<SaveableStateHolder?> { null }
+public val LocalSaveableStateHolder: ProvidableCompositionLocal<SaveableStateHolder?> =
+    staticCompositionLocalOf<SaveableStateHolder?> { null }
 
 @Composable
 public fun CompassSaveableState(
