@@ -1,6 +1,9 @@
 [versions]
 agp = "9.2.1"
 kotlin = "2.3.21"
+junit4 = "4.13.2"
+android-test-ext = "1.2.1"
+android-test-runner = "1.6.2"
 compose-multiplatform = "1.11.0-beta03"
 navigationCompose = "1.1.0"
 kotlinxSerializationJson = "1.11.0"
@@ -38,6 +41,13 @@ androidx-material3 = { module = "org.jetbrains.compose.material3:material3", ver
 components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose-multiplatform" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
 desktop = { module = "org.jetbrains.compose.desktop:desktop", version.ref = "compose-multiplatform" }
+
+# Test
+junit4 = { module = "junit:junit", version.ref = "junit4" }
+android-test-ext-junit = { module = "androidx.test.ext:junit", version.ref = "android-test-ext" }
+android-test-runner = { module = "androidx.test:runner", version.ref = "android-test-runner" }
+compose-ui-test = { module = "org.jetbrains.compose.ui:ui-test", version.ref = "compose-multiplatform" }
+compose-ui-test-manifest = { module = "org.jetbrains.compose.ui:ui-test-manifest", version.ref = "compose-multiplatform" }
 
 # Build Logic Dependencies
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }

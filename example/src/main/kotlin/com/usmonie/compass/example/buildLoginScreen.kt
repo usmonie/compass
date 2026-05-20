@@ -12,6 +12,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.usmonie.compass.screen.state.StateScreenDestination
@@ -73,20 +74,27 @@ internal fun buildLoginScreen(
                     OutlinedTextField(
                         value = state.email,
                         onValueChange = { sendAction(LoginAction.EnterEmail(it)) },
-                        label = { Text("Email") }
+                        label = { Text("Email") },
+                        modifier = Modifier.testTag("login_email_field"),
                     )
                     OutlinedTextField(
                         value = state.password,
                         onValueChange = { sendAction(LoginAction.EnterPassword(it)) },
                         label = { Text("Password") },
-                        visualTransformation = PasswordVisualTransformation()
+                        visualTransformation = PasswordVisualTransformation(),
+                        modifier = Modifier.testTag("login_password_field"),
                     )
                     if (state.error != null) {
-                        Text(text = state.error, color = colorScheme.error)
+                        Text(
+                            text = state.error,
+                            color = colorScheme.error,
+                            modifier = Modifier.testTag("login_error_text"),
+                        )
                     }
                     Button(
                         onClick = { sendAction(LoginAction.Submit) },
-                        enabled = !state.isLoading
+                        enabled = !state.isLoading,
+                        modifier = Modifier.testTag("login_submit_button"),
                     ) {
                         if (state.isLoading) CircularProgressIndicator(Modifier.size(16.dp))
                         else Text("Login")

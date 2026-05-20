@@ -12,6 +12,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.usmonie.compass.screen.state.StateScreenDestination
 import com.usmonie.compass.screen.state.stateScreen
@@ -58,8 +59,14 @@ internal fun buildCounterScreen(onNavigate: () -> Unit): StateScreenDestination<
                     Text("This screen tests state preservation.", style = androidx.compose.material3.MaterialTheme.typography.titleLarge)
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Text("Counter (ViewModel State): ${state.count}")
-                    Button(onClick = { sendAction(CounterAction.Increment) }) {
+                    Text(
+                        "Counter (ViewModel State): ${state.count}",
+                        modifier = Modifier.testTag("counter_count_text"),
+                    )
+                    Button(
+                        onClick = { sendAction(CounterAction.Increment) },
+                        modifier = Modifier.testTag("counter_increment_btn"),
+                    ) {
                         Text("Increment")
                     }
 
@@ -68,7 +75,8 @@ internal fun buildCounterScreen(onNavigate: () -> Unit): StateScreenDestination<
                     OutlinedTextField(
                         value = state.text,
                         onValueChange = { sendAction(CounterAction.UpdateText(it)) },
-                        label = { Text("Typed Text (UI State)") }
+                        label = { Text("Typed Text (UI State)") },
+                        modifier = Modifier.testTag("counter_text_field"),
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
